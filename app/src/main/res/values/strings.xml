@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="release_date">"Release Date: "</string>
+    <string name="label_movie_info">Movie Info</string>
+    <string name="top_movies">Top Movies</string>
+    <string name="popular_movies">Popular Movies</string>
+    <string name="favorite_movies">Favorite Movies</string>
+    <string name="no_internet">No internet connection.</string>
+    <string name="trailers">Trailers</string>
+    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="empty_movie_list">The Favorite Movies list is empty. Add Movies to your favorites using the menu option on the top right.</string>
+    <string name="reviews">Reviews</string>
+    <string name="review_author">"Author: "</string>
+</resources>

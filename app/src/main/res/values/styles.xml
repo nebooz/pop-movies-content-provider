@@ -1,0 +1,10 @@
+<resources>
+
+    <style name="MovieTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@android:color/black</item>
+        <item name="colorPrimaryDark">@color/defaultDarkColor</item>
+        <item name="colorAccent">@color/defaultLightColor</item>
+        <item name="android:statusBarColor">?android:attr/colorPrimary</item>
+    </style>
+
+</resources>
