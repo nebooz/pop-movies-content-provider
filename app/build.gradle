@@ -3,7 +3,7 @@ apply plugin: 'realm-android'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '24.0.2'
+    buildToolsVersion '24.0.3'
     defaultConfig {
         applicationId "com.abnd.mdiaz.popularmovies"
         minSdkVersion 21
@@ -36,11 +36,10 @@ dependencies {
     compile 'com.google.code.gson:gson:2.6.2'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'io.reactivex:rxjava:1.1.6'
-    compile 'io.reactivex:rxandroid:1.2.1'
     compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
     compile 'com.github.florent37:picassopalette:1.0.0@aar'
     compile 'com.android.support:support-v4:24.2.0'
+    compile 'com.squareup.okhttp3:okhttp:3.5.0'
     testCompile 'junit:junit:4.12'
     provided 'org.glassfish:javax.annotation:10.0-b28'
 }

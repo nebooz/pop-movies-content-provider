@@ -7,6 +7,8 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -23,9 +25,12 @@ import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.R;
 import com.abnd.mdiaz.popularmovies.model.Movie;
+import com.abnd.mdiaz.popularmovies.model.MovieTwo;
 import com.abnd.mdiaz.popularmovies.model.MoviesResponse;
 import com.abnd.mdiaz.popularmovies.rest.ApiClient;
 import com.abnd.mdiaz.popularmovies.rest.ApiInterface;
+import com.abnd.mdiaz.popularmovies.rest.MovieLoader;
+import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
 import com.abnd.mdiaz.popularmovies.utils.MarginDecoration;
 import com.abnd.mdiaz.popularmovies.utils.SensitiveInfo;
 import com.abnd.mdiaz.popularmovies.views.adapters.MovieAdapter;
@@ -41,7 +46,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MovieListFragment extends Fragment {
+public class MovieListFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MovieTwo>> {
 
     private static final String TAG = MovieListFragment.class.getSimpleName();
     private static final String TOP_MOVIES_TAG = "Top";
@@ -94,7 +99,29 @@ public class MovieListFragment extends Fragment {
                 getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-        return networkInfo != null && networkInfo.isConnected();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            getLoaderManager().initLoader(0, null, this);
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    @Override
+    public Loader<List<MovieTwo>> onCreateLoader(int id, Bundle args) {
+        return new MovieLoader(this.getContext(), QueryUtils.FULL_TEST_URL);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<MovieTwo>> loader, List<MovieTwo> data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<MovieTwo>> loader) {
+
+
     }
 
     @Override

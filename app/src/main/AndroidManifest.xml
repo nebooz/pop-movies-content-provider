@@ -23,6 +23,13 @@
         <activity
             android:name=".MovieDetailActivity"
             android:parentActivityName=".MovieListActivity" />
+
+        <provider
+            android:name=".rest.MovieProvider"
+            android:authorities="com.abnd.mdiaz.popularmovies"
+            android:exported="false"
+            android:protectionLevel="signature"
+            android:syncable="true" />
     </application>
 
 </manifest>
