@@ -17,6 +17,7 @@ public class DatabaseContract {
      */
     public static final String PATH_TOP_MOVIES = "top_movies";
     public static final String PATH_POP_MOVIES = "pop_movies";
+    public static final String PATH_FAV_MOVIES = "fav_movies";
     /**
      * The content authority is used to create the base of all URIs which apps will use to
      * contact this content provider.
@@ -76,6 +77,31 @@ public class DatabaseContract {
 
         // Define a function to build a URI to find a specific movie by it's identifier
         public static Uri buildPopMovieUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+    }
+
+    public static final class favMovieEntry implements BaseColumns {
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_FAV_MOVIES).build();
+
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/" + CONTENT_URI + "/" + PATH_FAV_MOVIES;
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/" + CONTENT_URI + "/" + PATH_FAV_MOVIES;
+
+        // Define the table schema
+        public static final String TABLE_NAME = "favMovieTable";
+        public static final String COLUMN_NAME = "favMovieName";
+        public static final String COLUMN_RELEASE_DATE = "favMovieReleaseDate";
+        public static final String COLUMN_VOTE_AVERAGE = "favMovieVoteAverage";
+        public static final String COLUMN_POSTER_PATH = "favMoviePosterPath";
+        public static final String COLUMN_BACKDROP_PATH = "favMovieBackdropPath";
+        public static final String COLUMN_OVERVIEW = "favMovieOverview";
+        public static final String COLUMN_MOVIEDB_ID = "favMovieDbId";
+
+        // Define a function to build a URI to find a specific movie by it's identifier
+        public static Uri buildFavMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
     }

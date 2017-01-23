@@ -22,6 +22,8 @@ public class MovieProvider extends ContentProvider {
     private static final int TOP_MOVIE_ID = 101;
     private static final int POP_MOVIE = 200;
     private static final int POP_MOVIE_ID = 201;
+    private static final int FAV_MOVIE = 300;
+    private static final int FAV_MOVIE_ID = 301;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private DatabaseHelper mOpenHelper;
@@ -39,6 +41,8 @@ public class MovieProvider extends ContentProvider {
         matcher.addURI(content, DatabaseContract.PATH_TOP_MOVIES + "/#", TOP_MOVIE_ID);
         matcher.addURI(content, DatabaseContract.PATH_POP_MOVIES, POP_MOVIE);
         matcher.addURI(content, DatabaseContract.PATH_POP_MOVIES + "/#", POP_MOVIE_ID);
+        matcher.addURI(content, DatabaseContract.PATH_FAV_MOVIES, FAV_MOVIE);
+        matcher.addURI(content, DatabaseContract.PATH_FAV_MOVIES + "/#", FAV_MOVIE_ID);
 
         return matcher;
     }
@@ -54,6 +58,7 @@ public class MovieProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor retCursor;
+        long _id;
         switch (sUriMatcher.match(uri)) {
             case TOP_MOVIE:
                 retCursor = db.query(
@@ -67,7 +72,7 @@ public class MovieProvider extends ContentProvider {
                 );
                 break;
             case TOP_MOVIE_ID:
-                long _id = ContentUris.parseId(uri);
+                _id = ContentUris.parseId(uri);
                 retCursor = db.query(
                         DatabaseContract.topMovieEntry.TABLE_NAME,
                         projection,
@@ -80,7 +85,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             case POP_MOVIE:
                 retCursor = db.query(
-                        DatabaseContract.topMovieEntry.TABLE_NAME,
+                        DatabaseContract.popMovieEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -95,6 +100,29 @@ public class MovieProvider extends ContentProvider {
                         DatabaseContract.popMovieEntry.TABLE_NAME,
                         projection,
                         DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID + " = ?",
+                        new String[]{String.valueOf(_id)},
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            case FAV_MOVIE:
+                retCursor = db.query(
+                        DatabaseContract.favMovieEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            case FAV_MOVIE_ID:
+                _id = ContentUris.parseId(uri);
+                retCursor = db.query(
+                        DatabaseContract.favMovieEntry.TABLE_NAME,
+                        projection,
+                        DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID + " = ?",
                         new String[]{String.valueOf(_id)},
                         null,
                         null,
@@ -125,6 +153,10 @@ public class MovieProvider extends ContentProvider {
                 return DatabaseContract.popMovieEntry.CONTENT_TYPE;
             case POP_MOVIE_ID:
                 return DatabaseContract.popMovieEntry.CONTENT_ITEM_TYPE;
+            case FAV_MOVIE:
+                return DatabaseContract.favMovieEntry.CONTENT_TYPE;
+            case FAV_MOVIE_ID:
+                return DatabaseContract.favMovieEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -155,6 +187,14 @@ public class MovieProvider extends ContentProvider {
                     throw new UnsupportedOperationException("Unable to insert rows into: " + uri);
                 }
                 break;
+            case FAV_MOVIE:
+                _id = db.insert(DatabaseContract.favMovieEntry.TABLE_NAME, null, values);
+                if (_id > 0) {
+                    returnUri = DatabaseContract.favMovieEntry.buildFavMovieUri(_id);
+                } else {
+                    throw new UnsupportedOperationException("Unable to insert rows into: " + uri);
+                }
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -176,6 +216,9 @@ public class MovieProvider extends ContentProvider {
                 break;
             case POP_MOVIE:
                 rows = db.delete(DatabaseContract.popMovieEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case FAV_MOVIE:
+                rows = db.delete(DatabaseContract.favMovieEntry.TABLE_NAME, selection, selectionArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -200,6 +243,9 @@ public class MovieProvider extends ContentProvider {
                 break;
             case POP_MOVIE:
                 rows = db.update(DatabaseContract.popMovieEntry.TABLE_NAME, values, selection, selectionArgs);
+                break;
+            case FAV_MOVIE:
+                rows = db.update(DatabaseContract.favMovieEntry.TABLE_NAME, values, selection, selectionArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
