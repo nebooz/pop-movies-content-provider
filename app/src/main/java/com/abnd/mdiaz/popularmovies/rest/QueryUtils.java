@@ -91,7 +91,7 @@ public class QueryUtils {
                 ContentValues mNewValues = new ContentValues();
 
                 /*
-                 * Sets the values of each column and inserts the word. The arguments to the "put"
+                 * Sets the values of each column and inserts the movie. The arguments to the "put"
                  * method are "column name" and "value"
                  */
                 mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_NAME, movieName);
