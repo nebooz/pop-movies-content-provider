@@ -42,6 +42,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         addTopMovieTable(db);
         addPopMovieTable(db);
+        addFavMovieTable(db);
     }
 
     /**
@@ -90,6 +91,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         DatabaseContract.popMovieEntry.COLUMN_POSTER_PATH + " TEXT NOT NULL, " +
                         DatabaseContract.popMovieEntry.COLUMN_BACKDROP_PATH + " TEXT NOT NULL, " +
                         DatabaseContract.popMovieEntry.COLUMN_OVERVIEW + " TEXT NOT NULL);"
+        );
+    }
+
+    private void addFavMovieTable(SQLiteDatabase db) {
+        db.execSQL(
+                "CREATE TABLE " + DatabaseContract.favMovieEntry.TABLE_NAME + " (" +
+                        DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID + " INTEGER PRIMARY KEY, " +
+                        DatabaseContract.favMovieEntry.COLUMN_NAME + " TEXT NOT NULL, " +
+                        DatabaseContract.favMovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +
+                        DatabaseContract.favMovieEntry.COLUMN_VOTE_AVERAGE + " REAL NOT NULL, " +
+                        DatabaseContract.favMovieEntry.COLUMN_POSTER_PATH + " TEXT NOT NULL, " +
+                        DatabaseContract.favMovieEntry.COLUMN_BACKDROP_PATH + " TEXT NOT NULL, " +
+                        DatabaseContract.favMovieEntry.COLUMN_OVERVIEW + " TEXT NOT NULL);"
         );
     }
 }
