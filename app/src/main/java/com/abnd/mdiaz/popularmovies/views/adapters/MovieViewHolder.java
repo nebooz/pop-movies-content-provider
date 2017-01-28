@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import com.abnd.mdiaz.popularmovies.MovieDetailActivity;
 import com.abnd.mdiaz.popularmovies.MovieListActivity;
 import com.abnd.mdiaz.popularmovies.R;
-import com.abnd.mdiaz.popularmovies.model.Movie;
+import com.abnd.mdiaz.popularmovies.model.MovieTwo;
 
 import java.util.List;
 
@@ -17,12 +17,12 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     protected ImageView movieThumbnail;
     protected ImageView favoriteTag;
-    private List<Movie> mMovieList;
+    private List<MovieTwo> mMovieList;
     private Context mContext;
 
     private OnMovieSelectedListener listener;
 
-    public MovieViewHolder(View itemView, List<Movie> movieList, Context context) {
+    public MovieViewHolder(View itemView, List<MovieTwo> movieList, Context context) {
         super(itemView);
 
         mContext = context;
@@ -40,7 +40,8 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         int position = getAdapterPosition();
 
-        Movie selectedMovie = mMovieList.get(position);
+        MovieTwo selectedMovie = mMovieList.get(position);
+        int selectedMovieId = selectedMovie.getMovieId();
 
         /*
         This seems to be a very non-optimized way of doing this properly.
@@ -58,7 +59,7 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
             Intent intent = new Intent(view.getContext(), MovieDetailActivity.class);
             intent.putExtra("is_tablet", false);
-            intent.putExtra("selected_movie", selectedMovie);
+            intent.putExtra("movieId", selectedMovieId);
 
             view.getContext().startActivity(intent);
 
@@ -67,7 +68,7 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     public interface OnMovieSelectedListener {
-        void onMovieSelected(Movie selectedMovie);
+        void onMovieSelected(MovieTwo selectedMovie);
     }
 
 }

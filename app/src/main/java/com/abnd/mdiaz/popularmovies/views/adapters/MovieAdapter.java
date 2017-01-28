@@ -1,13 +1,17 @@
 package com.abnd.mdiaz.popularmovies.views.adapters;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.abnd.mdiaz.popularmovies.R;
-import com.abnd.mdiaz.popularmovies.model.Movie;
+import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
+import com.abnd.mdiaz.popularmovies.model.MovieTwo;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -15,9 +19,10 @@ import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmResults;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
+
+    private static final String TAG = MovieAdapter.class.getSimpleName();
 
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String SMALL_IMAGE_SIZE = "w92";
@@ -25,9 +30,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
     private static final String LARGE_IMAGE_SIZE = "w500";
 
     private Context mContext;
-    private List<Movie> mMovieList = new ArrayList<>();
+    private List<MovieTwo> mMovieList = new ArrayList<>();
 
-    public MovieAdapter(Context context, List<Movie> movieList) {
+    public MovieAdapter(Context context, List<MovieTwo> movieList) {
         mContext = context;
         mMovieList = movieList;
     }
@@ -47,16 +52,26 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(mContext).build();
         Realm realm = Realm.getInstance(realmConfiguration);
 
-        Movie currentMovie = mMovieList.get(position);
+        MovieTwo currentMovie = mMovieList.get(position);
 
-        int currentMovieId = currentMovie.getMovieId();
+        Cursor movieCursor = queryMovieId(currentMovie.getMovieId());
 
-        RealmResults<Movie> favCheck = realm.where(Movie.class).equalTo("movieId", currentMovieId).findAll();
+        if (null == movieCursor) {
 
-        if (favCheck.size() > 0) {
-            holder.favoriteTag.setVisibility(View.VISIBLE);
-        } else {
+            Log.e(TAG, "extractMovies: Query Cursor returned null!, zomg!", new SQLiteDatabaseCorruptException());
+
+        } else if (movieCursor.getCount() < 1) {
+
+            movieCursor.close();
             holder.favoriteTag.setVisibility(View.GONE);
+
+
+        } else {
+
+            //Movie in Favorites
+            movieCursor.close();
+            holder.favoriteTag.setVisibility(View.VISIBLE);
+
         }
 
         String fullPosterPath = IMAGE_BASE_URL + MEDIUM_IMAGE_SIZE + currentMovie.getPosterPath();
@@ -65,12 +80,28 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
 
     }
 
+    private Cursor queryMovieId(int movieDbId) {
+
+        String[] mProjection = {DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID};
+
+        String mSelectionClause = DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
+
+        String[] mSelectionArgs = {String.valueOf(movieDbId)};
+
+        return mContext.getContentResolver().query(
+                DatabaseContract.favMovieEntry.CONTENT_URI,
+                mProjection,
+                mSelectionClause,
+                mSelectionArgs,
+                null);
+    }
+
     @Override
     public int getItemCount() {
         return (null != mMovieList ? mMovieList.size() : 0);
     }
 
-    public void setMovieList(List<Movie> movieList) {
+    public void setMovieList(List<MovieTwo> movieList) {
 
         mMovieList.addAll(movieList);
         notifyDataSetChanged();

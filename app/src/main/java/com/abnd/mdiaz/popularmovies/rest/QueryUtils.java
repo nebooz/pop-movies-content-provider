@@ -29,7 +29,10 @@ import okhttp3.Response;
 
 public class QueryUtils {
 
-    public static final String LOG_TAG = QueryUtils.class.getSimpleName();
+    public static final String TOP_MOVIES_TAG = "topMovies";
+    public static final String POP_MOVIES_TAG = "popMovies";
+    public static final String FAV_MOVIES_TAG = "favMovies";
+    private static final String LOG_TAG = QueryUtils.class.getSimpleName();
     private static final String MOVIEDB_BASE_URL = "https://api.themoviedb.org/3/movie/";
     private static final String MOVIEDB_TOP_MOVIES = "top_rated";
     private static final String MOVIEDB_POP_MOVIES = "popular";
@@ -129,13 +132,13 @@ public class QueryUtils {
         Uri movieTableUri;
 
         switch (movieTable) {
-            case "topMovies":
+            case TOP_MOVIES_TAG:
                 movieTableUri = DatabaseContract.topMovieEntry.CONTENT_URI;
                 break;
-            case "popMovies":
+            case POP_MOVIES_TAG:
                 movieTableUri = DatabaseContract.popMovieEntry.CONTENT_URI;
                 break;
-            case "favMovies":
+            case FAV_MOVIES_TAG:
                 movieTableUri = DatabaseContract.favMovieEntry.CONTENT_URI;
                 break;
             default:

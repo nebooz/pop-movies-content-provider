@@ -24,32 +24,23 @@ import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.R;
 import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
-import com.abnd.mdiaz.popularmovies.model.Movie;
-import com.abnd.mdiaz.popularmovies.model.MoviesResponse;
-import com.abnd.mdiaz.popularmovies.rest.ApiClient;
-import com.abnd.mdiaz.popularmovies.rest.ApiInterface;
+import com.abnd.mdiaz.popularmovies.model.MovieTwo;
 import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
 import com.abnd.mdiaz.popularmovies.utils.MarginDecoration;
-import com.abnd.mdiaz.popularmovies.utils.SensitiveInfo;
 import com.abnd.mdiaz.popularmovies.views.adapters.MovieAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmResults;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.FAV_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.POP_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.TOP_MOVIES_TAG;
 
 public class MovieListFragment extends Fragment {
 
     private static final String TAG = MovieListFragment.class.getSimpleName();
-    private static final String TOP_MOVIES_TAG = "Top";
-    private static final String POP_MOVIES_TAG = "Pop";
-    private static final String FAV_MOVIES_TAG = "Fav";
+
     private static final String INTER_FRAGMENT_TAG = "InterFragment";
 
     private RecyclerView mRecyclerView;
@@ -59,11 +50,7 @@ public class MovieListFragment extends Fragment {
     private ActionBar mActionBar;
     private TextView mEmptyFavsMessage;
 
-    private RealmConfiguration realmConfiguration;
-
     private boolean validConnection;
-
-    private Realm realm;
 
     public MovieListFragment() {
         // Required empty public constructor
@@ -111,16 +98,11 @@ public class MovieListFragment extends Fragment {
 
         if (validConnection) {
 
-            realmConfiguration = new RealmConfiguration.Builder(getContext()).build();
-
-            // Create a new empty instance of Realm
-            realm = Realm.getInstance(realmConfiguration);
-
             if (savedInstanceState != null) {
-                mListType = savedInstanceState.getString("ListType", POP_MOVIES_TAG);
+                mListType = savedInstanceState.getString("ListType", QueryUtils.POP_MOVIES_TAG);
                 Log.d(TAG, "List Type: " + mListType);
             } else {
-                mListType = POP_MOVIES_TAG;
+                mListType = QueryUtils.POP_MOVIES_TAG;
             }
 
             AppCompatActivity mActivity = (AppCompatActivity) getActivity();
@@ -128,7 +110,7 @@ public class MovieListFragment extends Fragment {
 
             setHasOptionsMenu(true);
 
-            mAdapter = new MovieAdapter(getContext(), new ArrayList<Movie>());
+            mAdapter = new MovieAdapter(getContext(), new ArrayList<MovieTwo>());
 
         }
     }
@@ -226,7 +208,7 @@ public class MovieListFragment extends Fragment {
 
     }
 
-    private void loadAdapter(List<Movie> baseMovieList) {
+    private void loadAdapter(List<MovieTwo> baseMovieList) {
 
         mAdapter.clearData();
         mAdapter.setMovieList(baseMovieList);
@@ -248,22 +230,64 @@ public class MovieListFragment extends Fragment {
 
     }
 
-    private List<Movie> getMoviesFromDb(Context context, String movieTable) {
+    private List<MovieTwo> getMoviesFromDb(String movieTable) {
 
-        List<Movie> movieList = new ArrayList<>();
+        List<MovieTwo> movieList = new ArrayList<>();
 
-        Cursor cursor = QueryUtils.queryAllMovies(context, movieTable);
+        Cursor cursor = QueryUtils.queryAllMovies(getContext(), movieTable);
+
         try {
             while (cursor.moveToNext()) {
-                String movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_NAME));
-                String movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE));
-                float movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE));
-                String moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH));
-                String movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH));
-                String movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW));
-                int movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID));
 
-                movieList.add(new Movie(
+                String movieTitle;
+                String movieReleaseDate;
+                float movieVoteAverage;
+                String moviePosterPath;
+                String movieBackdropPath;
+                String movieOverview;
+                int movieId;
+
+                switch (movieTable) {
+                    case TOP_MOVIES_TAG:
+                        movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_NAME));
+                        movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE));
+                        movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE));
+                        moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH));
+                        movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH));
+                        movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW));
+                        movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID));
+                        break;
+                    case POP_MOVIES_TAG:
+                        movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_NAME));
+                        movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_RELEASE_DATE));
+                        movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_VOTE_AVERAGE));
+                        moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_POSTER_PATH));
+                        movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_BACKDROP_PATH));
+                        movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_OVERVIEW));
+                        movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID));
+                        break;
+                    case FAV_MOVIES_TAG:
+                        movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_NAME));
+                        movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_RELEASE_DATE));
+                        movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_VOTE_AVERAGE));
+                        moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_POSTER_PATH));
+                        movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_BACKDROP_PATH));
+                        movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_OVERVIEW));
+                        movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID));
+                        break;
+                    default:
+                        movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_NAME));
+                        movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE));
+                        movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE));
+                        moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH));
+                        movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH));
+                        movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW));
+                        movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID));
+                        break;
+
+                }
+
+                movieList.add(new MovieTwo(
                         movieTitle,
                         movieReleaseDate,
                         movieVoteAverage,
@@ -280,92 +304,15 @@ public class MovieListFragment extends Fragment {
             cursor.close();
         }
 
+
         return movieList;
 
     }
 
     public void getMovieList(String listType) {
 
-        String movieTable = "topMovies";
+        loadAdapter(getMoviesFromDb(listType));
 
-        List<Movie> movieListoca = getMoviesFromDb(getContext(), movieTable);
-
-
-        if (Objects.equals(listType, INTER_FRAGMENT_TAG)) {
-
-            listType = mListType;
-
-        }
-
-        if (Objects.equals(listType, FAV_MOVIES_TAG)) {
-
-            RealmResults<Movie> favMoviesList = realm.where(Movie.class).findAll();
-
-            Log.d(TAG, "getMovieList: favMoviesList Size: " + favMoviesList.size());
-
-            favMoviesList = favMoviesList.sort("title");
-
-            /*
-            If I use the Realm list straight up, there is a lot of noise in the UX, especially
-            when trying to re-add a just deleted movie to the Fav list.
-            */
-            List<Movie> regenFavMoviesList = new ArrayList<>();
-
-            for (Movie currentRealmMovie :
-                    favMoviesList) {
-                regenFavMoviesList.add(new Movie(currentRealmMovie));
-            }
-
-
-            if (regenFavMoviesList.size() == 0) {
-                mEmptyFavsMessage.setVisibility(View.VISIBLE);
-            } else {
-                mEmptyFavsMessage.setVisibility(View.GONE);
-            }
-
-            loadAdapter(regenFavMoviesList);
-
-            //loadAdapter(favMoviesList);
-
-        } else {
-
-            mEmptyFavsMessage.setVisibility(View.GONE);
-
-            ApiInterface apiService =
-                    ApiClient.getClient().create(ApiInterface.class);
-
-            Call<MoviesResponse> call;
-
-            switch (listType) {
-                case POP_MOVIES_TAG:
-                    call = apiService.getPopularMovies(SensitiveInfo.getMoviesApiKey());
-                    break;
-                case TOP_MOVIES_TAG:
-                    loadAdapter(movieListoca);
-                    call = apiService.getTopRatedMovies(SensitiveInfo.getMoviesApiKey());
-                    break;
-                default:
-                    call = apiService.getPopularMovies(SensitiveInfo.getMoviesApiKey());
-                    break;
-            }
-
-            call.enqueue(new Callback<MoviesResponse>() {
-                @Override
-                public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
-                    List<Movie> movieList = response.body().getResults();
-                    loadAdapter(movieList);
-                    //For some reason this method gets executed even when the activity is resumed...
-                    Log.d(TAG, "Number of movies received: " + movieList.size());
-                }
-
-                @Override
-                public void onFailure(Call<MoviesResponse> call, Throwable t) {
-                    // Log error here since request failed
-                    Log.e(TAG, t.toString());
-                }
-            });
-
-        }
     }
 
 }
