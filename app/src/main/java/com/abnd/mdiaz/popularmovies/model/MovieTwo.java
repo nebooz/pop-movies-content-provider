@@ -23,4 +23,60 @@ public class MovieTwo {
         this.mOverview = overview;
         this.mMovieId = movieId;
     }
+
+    public String getTitle() {
+        return mTitle;
+    }
+
+    public void setTitle(String title) {
+        this.mTitle = title;
+    }
+
+    public String getReleaseDate() {
+        return mReleaseDate;
+    }
+
+    public void setmeleaseDate(String releaseDate) {
+        this.mReleaseDate = releaseDate;
+    }
+
+    public float getVoteAverage() {
+        return mVoteAverage;
+    }
+
+    public void setVoteAverage(float voteAverage) {
+        this.mVoteAverage = voteAverage;
+    }
+
+    public String getPosterPath() {
+        return mPosterPath;
+    }
+
+    public void setPosterPath(String posterPath) {
+        this.mPosterPath = posterPath;
+    }
+
+    public String getBackdropPath() {
+        return mBackdropPath;
+    }
+
+    public void setBackdropPath(String backdropPath) {
+        this.mBackdropPath = backdropPath;
+    }
+
+    public String getOverview() {
+        return mOverview;
+    }
+
+    public void setOverview(String overview) {
+        this.mOverview = overview;
+    }
+
+    public int getMovieId() {
+        return mMovieId;
+    }
+
+    public void setMovieId(int movieId) {
+        this.mMovieId = movieId;
+    }
 }

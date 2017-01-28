@@ -64,8 +64,6 @@ public class QueryUtils {
 
     public static List<MovieTwo> extractMovies(Context context, String movieJson) {
 
-        List<MovieTwo> movies = new ArrayList<>();
-
         try {
             //Whole thing
             JSONObject main = new JSONObject(movieJson);
@@ -86,34 +84,18 @@ public class QueryUtils {
                 String movieOverview = movieObject.getString("overview");
                 int movieDbId = movieObject.getInt("id");
 
-                // A "projection" defines the columns that will be returned for each row
-                // Contract class constant for the MOVIEDB_ID column name
-                String[] mProjection = {DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID};
-
-                // Constructs a selection clause that matches the current Movie ID
-                String mSelectionClause = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
-
-                // Moves the current Movie ID to the selection arguments
-                String[] mSelectionArgs = {String.valueOf(movieDbId)};
-
-                // Does a query against the table and returns a Cursor object
-                Cursor mCursor = context.getContentResolver().query(
-                        DatabaseContract.topMovieEntry.CONTENT_URI,
-                        mProjection,
-                        mSelectionClause,
-                        mSelectionArgs,
-                        null);
+                Cursor movieCursor = queryMovieId(context, movieDbId);
 
                 // Some providers return null if an error occurs, others throw an exception
-                if (null == mCursor) {
+                if (null == movieCursor) {
 
                     Log.e(LOG_TAG, "extractMovies: Query Cursor returned null!, zomg!", new SQLiteDatabaseCorruptException());
 
-                } else if (mCursor.getCount() < 1) {
+                } else if (movieCursor.getCount() < 1) {
 
                     //No Matches
 
-                    mCursor.close();
+                    movieCursor.close();
 
                     insertMovie(context, movieName, movieReleaseDate, movieVoteAverage, moviePosterPath, movieBackdropPath, movieOverview, movieDbId);
 
@@ -121,7 +103,7 @@ public class QueryUtils {
 
                     //Movie already in the DB
 
-                    mCursor.close();
+                    movieCursor.close();
 
                     updateMovie(context, movieName, movieReleaseDate, movieVoteAverage, moviePosterPath, movieBackdropPath, movieOverview, movieDbId);
 
@@ -136,7 +118,58 @@ public class QueryUtils {
             Log.e("QueryUtils", "Problem parsing the Movie JSON results", e);
         }
 
-        return movies;
+        List<MovieTwo> baseList = new ArrayList<>();
+
+        return baseList;
+
+    }
+
+    public static Cursor queryAllMovies(Context context, String movieTable) {
+
+        Uri movieTableUri;
+
+        switch (movieTable) {
+            case "topMovies":
+                movieTableUri = DatabaseContract.topMovieEntry.CONTENT_URI;
+                break;
+            case "popMovies":
+                movieTableUri = DatabaseContract.popMovieEntry.CONTENT_URI;
+                break;
+            case "favMovies":
+                movieTableUri = DatabaseContract.favMovieEntry.CONTENT_URI;
+                break;
+            default:
+                movieTableUri = DatabaseContract.topMovieEntry.CONTENT_URI;
+                break;
+        }
+
+        return context.getContentResolver().query(
+                movieTableUri,
+                null,
+                null,
+                null,
+                null);
+    }
+
+    private static Cursor queryMovieId(Context context, int movieDbId) {
+        // A "projection" defines the columns that will be returned for each row
+        // Contract class constant for the MOVIEDB_ID column name
+        String[] mProjection = {DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID};
+
+        // Constructs a selection clause that matches the current Movie ID
+        String mSelectionClause = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
+
+        // Moves the current Movie ID to the selection arguments
+        String[] mSelectionArgs = {String.valueOf(movieDbId)};
+
+        // Does a query against the table and returns a Cursor object
+
+        return context.getContentResolver().query(
+                DatabaseContract.topMovieEntry.CONTENT_URI,
+                mProjection,
+                mSelectionClause,
+                mSelectionArgs,
+                null);
     }
 
     private static void insertMovie(Context context, String movieName, String movieReleaseDate, float movieVoteAverage, String moviePosterPath, String movieBackdropPath, String movieOverview, int movieDbId) {

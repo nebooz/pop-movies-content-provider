@@ -1,10 +1,15 @@
 package com.abnd.mdiaz.popularmovies;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.FrameLayout;
@@ -13,10 +18,18 @@ import android.widget.LinearLayout;
 import com.abnd.mdiaz.popularmovies.fragments.MovieDetailFragment;
 import com.abnd.mdiaz.popularmovies.fragments.MovieListFragment;
 import com.abnd.mdiaz.popularmovies.model.Movie;
+import com.abnd.mdiaz.popularmovies.model.MovieTwo;
+import com.abnd.mdiaz.popularmovies.rest.MovieLoader;
+import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
 import com.abnd.mdiaz.popularmovies.views.adapters.MovieViewHolder;
 
+import java.util.List;
 
-public class MovieListActivity extends AppCompatActivity implements MovieViewHolder.OnMovieSelectedListener, MovieDetailFragment.OnDatabaseChangedListener {
+
+public class MovieListActivity extends AppCompatActivity implements
+        MovieViewHolder.OnMovieSelectedListener,
+        MovieDetailFragment.OnDatabaseChangedListener,
+        LoaderManager.LoaderCallbacks<List<MovieTwo>> {
 
     public static final String INTER_FRAGMENT_TAG = "InterFragment";
     private static final String TAG = MovieListActivity.class.getSimpleName();
@@ -27,8 +40,8 @@ public class MovieListActivity extends AppCompatActivity implements MovieViewHol
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
-        //Realm.deleteRealm(realmConfiguration);
+        //Check online status before updating the DB with movies
+        boolean isConnected = checkConnectivity();
 
         setContentView(R.layout.activity_movie_list);
 
@@ -54,6 +67,37 @@ public class MovieListActivity extends AppCompatActivity implements MovieViewHol
         activityBaseLayout.setBackground(bitmapDrawable);
 
     }
+
+    private boolean checkConnectivity() {
+        ConnectivityManager connectivityManager = (ConnectivityManager)
+                this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (networkInfo != null && networkInfo.isConnected()) {
+            getSupportLoaderManager().initLoader(0, null, null);
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    @Override
+    public Loader<List<MovieTwo>> onCreateLoader(int id, Bundle args) {
+        return new MovieLoader(this.getApplicationContext(), QueryUtils.FULL_TEST_URL);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<MovieTwo>> loader, List<MovieTwo> data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<MovieTwo>> loader) {
+
+
+    }
+
 
     public boolean isTablet() {
         return isTwoPane;

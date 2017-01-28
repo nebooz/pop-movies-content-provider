@@ -98,6 +98,18 @@ public class Movie extends RealmObject implements Parcelable {
         this.movieId = baseMovie.getMovieId();
     }
 
+    public Movie(String title, String releaseDate, float voteAverage, String posterPath, String backdropPath, String overview, int movieId) {
+        this.title = title;
+        this.releaseDate = releaseDate;
+        this.voteAverage = voteAverage;
+        this.posterPath = posterPath;
+        this.backdropPath = backdropPath;
+        this.overview = overview;
+        this.movieId = movieId;
+    }
+
+
+
 
 
     /**

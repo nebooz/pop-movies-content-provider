@@ -2,13 +2,12 @@ package com.abnd.mdiaz.popularmovies.fragments;
 
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -24,12 +23,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.R;
+import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
 import com.abnd.mdiaz.popularmovies.model.Movie;
-import com.abnd.mdiaz.popularmovies.model.MovieTwo;
 import com.abnd.mdiaz.popularmovies.model.MoviesResponse;
 import com.abnd.mdiaz.popularmovies.rest.ApiClient;
 import com.abnd.mdiaz.popularmovies.rest.ApiInterface;
-import com.abnd.mdiaz.popularmovies.rest.MovieLoader;
 import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
 import com.abnd.mdiaz.popularmovies.utils.MarginDecoration;
 import com.abnd.mdiaz.popularmovies.utils.SensitiveInfo;
@@ -46,7 +44,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MovieListFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MovieTwo>> {
+public class MovieListFragment extends Fragment {
 
     private static final String TAG = MovieListFragment.class.getSimpleName();
     private static final String TOP_MOVIES_TAG = "Top";
@@ -100,27 +98,10 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
         if (networkInfo != null && networkInfo.isConnected()) {
-            getLoaderManager().initLoader(0, null, this);
             return true;
         } else {
             return false;
         }
-
-    }
-
-    @Override
-    public Loader<List<MovieTwo>> onCreateLoader(int id, Bundle args) {
-        return new MovieLoader(this.getContext(), QueryUtils.FULL_TEST_URL);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<MovieTwo>> loader, List<MovieTwo> data) {
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<MovieTwo>> loader) {
-
 
     }
 
@@ -267,7 +248,48 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
 
     }
 
+    private List<Movie> getMoviesFromDb(Context context, String movieTable) {
+
+        List<Movie> movieList = new ArrayList<>();
+
+        Cursor cursor = QueryUtils.queryAllMovies(context, movieTable);
+        try {
+            while (cursor.moveToNext()) {
+                String movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_NAME));
+                String movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE));
+                float movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE));
+                String moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH));
+                String movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH));
+                String movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW));
+                int movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID));
+
+                movieList.add(new Movie(
+                        movieTitle,
+                        movieReleaseDate,
+                        movieVoteAverage,
+                        moviePosterPath,
+                        movieBackdropPath,
+                        movieOverview,
+                        movieId
+                ));
+
+                Log.d(TAG, "getMoviesFromDb: " + movieTitle + " - Movie Added!");
+
+            }
+        } finally {
+            cursor.close();
+        }
+
+        return movieList;
+
+    }
+
     public void getMovieList(String listType) {
+
+        String movieTable = "topMovies";
+
+        List<Movie> movieListoca = getMoviesFromDb(getContext(), movieTable);
+
 
         if (Objects.equals(listType, INTER_FRAGMENT_TAG)) {
 
@@ -319,6 +341,7 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
                     call = apiService.getPopularMovies(SensitiveInfo.getMoviesApiKey());
                     break;
                 case TOP_MOVIES_TAG:
+                    loadAdapter(movieListoca);
                     call = apiService.getTopRatedMovies(SensitiveInfo.getMoviesApiKey());
                     break;
                 default:
