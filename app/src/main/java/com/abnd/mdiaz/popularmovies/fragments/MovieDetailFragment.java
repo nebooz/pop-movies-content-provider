@@ -3,6 +3,7 @@ package com.abnd.mdiaz.popularmovies.fragments;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.R;
+import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
 import com.abnd.mdiaz.popularmovies.model.Movie;
 import com.abnd.mdiaz.popularmovies.model.Review;
 import com.abnd.mdiaz.popularmovies.model.ReviewsResponse;
@@ -34,6 +36,7 @@ import com.abnd.mdiaz.popularmovies.model.Trailer;
 import com.abnd.mdiaz.popularmovies.model.TrailersResponse;
 import com.abnd.mdiaz.popularmovies.rest.ApiClient;
 import com.abnd.mdiaz.popularmovies.rest.ApiInterface;
+import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
 import com.abnd.mdiaz.popularmovies.utils.SensitiveInfo;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Picasso;
@@ -44,8 +47,6 @@ import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmResults;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -88,11 +89,11 @@ public class MovieDetailFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static MovieDetailFragment newInstance(Movie movie, boolean isTablet) {
+    public static MovieDetailFragment newInstance(int movieId, boolean isTablet) {
 
         MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
         Bundle args = new Bundle();
-        args.putParcelable("selectedMovie", movie);
+        args.putInt("movieId", movieId);
         args.putBoolean("is_tablet", isTablet);
         movieDetailFragment.setArguments(args);
         return movieDetailFragment;
@@ -125,20 +126,85 @@ public class MovieDetailFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
-        mMovie = getArguments().getParcelable("selectedMovie");
+        int movieId = getArguments().getInt("movieId", 1);
+        String listType = getArguments().getString("listType", QueryUtils.TOP_MOVIES_TAG);
 
-        // Create a new instance of Realm.
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(getContext()).build();
-        realm = Realm.getInstance(realmConfiguration);
+        String[] projection = new String[7];
+        String selectionClause;
+        Uri uri;
+        String[] selectionArgs = {String.valueOf(movieId)};
 
-        // Getting all values from selected movie.
-        mMovieName = mMovie.getTitle();
-        mMovieId = mMovie.getMovieId();
-        mMoviePosterPath = mMovie.getPosterPath();
-        mMovieBackdropPath = mMovie.getBackdropPath();
-        mMovieRating = mMovie.getVoteAverage();
-        mMovieSynopsis = mMovie.getOverview();
-        String preFixedReleaseDate = mMovie.getReleaseDate();
+        switch (listType) {
+            case QueryUtils.TOP_MOVIES_TAG:
+
+                projection[0] = DatabaseContract.topMovieEntry.COLUMN_NAME;
+                projection[1] = DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE;
+                projection[2] = DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE;
+                projection[3] = DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH;
+                projection[4] = DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH;
+                projection[5] = DatabaseContract.topMovieEntry.COLUMN_OVERVIEW;
+                projection[6] = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID;
+
+                selectionClause = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
+
+                uri = DatabaseContract.topMovieEntry.CONTENT_URI;
+
+                break;
+
+            case QueryUtils.POP_MOVIES_TAG:
+
+                projection[0] = DatabaseContract.popMovieEntry.COLUMN_NAME;
+                projection[1] = DatabaseContract.popMovieEntry.COLUMN_RELEASE_DATE;
+                projection[2] = DatabaseContract.popMovieEntry.COLUMN_VOTE_AVERAGE;
+                projection[3] = DatabaseContract.popMovieEntry.COLUMN_POSTER_PATH;
+                projection[4] = DatabaseContract.popMovieEntry.COLUMN_BACKDROP_PATH;
+                projection[5] = DatabaseContract.popMovieEntry.COLUMN_OVERVIEW;
+                projection[6] = DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID;
+
+                selectionClause = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
+
+                uri = DatabaseContract.topMovieEntry.CONTENT_URI;
+
+                break;
+
+            case QueryUtils.FAV_MOVIES_TAG:
+
+                projection[0] = DatabaseContract.favMovieEntry.COLUMN_NAME;
+                projection[1] = DatabaseContract.favMovieEntry.COLUMN_RELEASE_DATE;
+                projection[2] = DatabaseContract.favMovieEntry.COLUMN_VOTE_AVERAGE;
+                projection[3] = DatabaseContract.favMovieEntry.COLUMN_POSTER_PATH;
+                projection[4] = DatabaseContract.favMovieEntry.COLUMN_BACKDROP_PATH;
+                projection[5] = DatabaseContract.favMovieEntry.COLUMN_OVERVIEW;
+                projection[6] = DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID;
+
+                selectionClause = DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
+
+                uri = DatabaseContract.favMovieEntry.CONTENT_URI;
+
+                break;
+
+            default:
+
+                selectionClause = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
+                uri = DatabaseContract.topMovieEntry.CONTENT_URI;
+                break;
+
+        }
+
+        Cursor cursor = getContext().getContentResolver().query(
+                uri,
+                projection,
+                selectionClause,
+                selectionArgs,
+                null);
+
+        mMovieName = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_NAME));
+        String preFixedReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE));
+        mMovieRating = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE));
+        mMoviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH));
+        mMovieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH));
+        mMovieSynopsis = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW));
+        mMovieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID));
 
         //Proper date
         mMovieReleaseDate = this.getString(R.string.release_date) + dateFormat(preFixedReleaseDate);
@@ -405,15 +471,7 @@ public class MovieDetailFragment extends Fragment {
 
     public boolean isFavorite() {
 
-        //int currentMovieId = mMovie.getMovieId();
-
-        RealmResults<Movie> favCheck = realm.where(Movie.class).equalTo("movieId", mMovieId).findAll();
-
-        if (favCheck.size() > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return QueryUtils.isFavorite(getContext(), mMovieId);
 
     }
 
@@ -449,7 +507,7 @@ public class MovieDetailFragment extends Fragment {
                         @Override
                         public void execute(Realm realm) {
 
-                            realm.copyToRealm(mMovie);
+                            //realm.copyToRealm(mMovie);
 
                         }
                     }, new Realm.Transaction.OnSuccess() {
@@ -476,8 +534,8 @@ public class MovieDetailFragment extends Fragment {
                         @Override
                         public void execute(Realm realm) {
 
-                            Movie currentMovie = realm.where(Movie.class).equalTo("movieId", mMovieId).findFirst();
-                            currentMovie.deleteFromRealm();
+                            //Movie currentMovie = realm.where(Movie.class).equalTo("movieId", mMovieId).findFirst();
+                            //currentMovie.deleteFromRealm();
 
                         }
                     }, new Realm.Transaction.OnSuccess() {

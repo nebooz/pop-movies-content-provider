@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.R;
 import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
-import com.abnd.mdiaz.popularmovies.model.MovieTwo;
+import com.abnd.mdiaz.popularmovies.model.Movie;
 import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
 import com.abnd.mdiaz.popularmovies.utils.MarginDecoration;
 import com.abnd.mdiaz.popularmovies.views.adapters.MovieAdapter;
@@ -110,7 +110,7 @@ public class MovieListFragment extends Fragment {
 
             setHasOptionsMenu(true);
 
-            mAdapter = new MovieAdapter(getContext(), new ArrayList<MovieTwo>());
+            mAdapter = new MovieAdapter(getContext(), new ArrayList<Movie>(), mListType);
 
         }
     }
@@ -208,7 +208,7 @@ public class MovieListFragment extends Fragment {
 
     }
 
-    private void loadAdapter(List<MovieTwo> baseMovieList) {
+    private void loadAdapter(List<Movie> baseMovieList) {
 
         mAdapter.clearData();
         mAdapter.setMovieList(baseMovieList);
@@ -230,9 +230,9 @@ public class MovieListFragment extends Fragment {
 
     }
 
-    private List<MovieTwo> getMoviesFromDb(String movieTable) {
+    private List<Movie> getMoviesFromDb(String movieTable) {
 
-        List<MovieTwo> movieList = new ArrayList<>();
+        List<Movie> movieList = new ArrayList<>();
 
         Cursor cursor = QueryUtils.queryAllMovies(getContext(), movieTable);
 
@@ -287,7 +287,7 @@ public class MovieListFragment extends Fragment {
 
                 }
 
-                movieList.add(new MovieTwo(
+                movieList.add(new Movie(
                         movieTitle,
                         movieReleaseDate,
                         movieVoteAverage,

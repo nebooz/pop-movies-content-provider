@@ -3,14 +3,14 @@ package com.abnd.mdiaz.popularmovies.rest;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
-import com.abnd.mdiaz.popularmovies.model.MovieTwo;
+import com.abnd.mdiaz.popularmovies.model.Movie;
 
 import java.util.List;
 
 /**
  * Created by neboo on 11-Aug-16.
  */
-public class MovieLoader extends AsyncTaskLoader<List<MovieTwo>> {
+public class MovieLoader extends AsyncTaskLoader<List<Movie>> {
 
     private String mUrl;
 
@@ -25,7 +25,7 @@ public class MovieLoader extends AsyncTaskLoader<List<MovieTwo>> {
     }
 
     @Override
-    public List<MovieTwo> loadInBackground() {
+    public List<Movie> loadInBackground() {
 
         return QueryUtils.fetchMovies(getContext(), mUrl);
 

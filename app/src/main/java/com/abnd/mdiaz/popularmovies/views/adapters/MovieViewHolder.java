@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import com.abnd.mdiaz.popularmovies.MovieDetailActivity;
 import com.abnd.mdiaz.popularmovies.MovieListActivity;
 import com.abnd.mdiaz.popularmovies.R;
-import com.abnd.mdiaz.popularmovies.model.MovieTwo;
+import com.abnd.mdiaz.popularmovies.model.Movie;
 
 import java.util.List;
 
@@ -17,17 +17,20 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     protected ImageView movieThumbnail;
     protected ImageView favoriteTag;
-    private List<MovieTwo> mMovieList;
+    private List<Movie> mMovieList;
     private Context mContext;
+    private String mListType;
 
     private OnMovieSelectedListener listener;
 
-    public MovieViewHolder(View itemView, List<MovieTwo> movieList, Context context) {
+    public MovieViewHolder(View itemView, List<Movie> movieList, Context context, String listType) {
         super(itemView);
 
-        mContext = context;
-        listener = (OnMovieSelectedListener) context;
         mMovieList = movieList;
+        mContext = context;
+        mListType = listType;
+
+        listener = (OnMovieSelectedListener) context;
         movieThumbnail = (ImageView) itemView.findViewById(R.id.card_thumbnail);
         favoriteTag = (ImageView) itemView.findViewById(R.id.img_card_fav_tag);
 
@@ -40,7 +43,7 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         int position = getAdapterPosition();
 
-        MovieTwo selectedMovie = mMovieList.get(position);
+        Movie selectedMovie = mMovieList.get(position);
         int selectedMovieId = selectedMovie.getMovieId();
 
         /*
@@ -60,6 +63,7 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
             Intent intent = new Intent(view.getContext(), MovieDetailActivity.class);
             intent.putExtra("is_tablet", false);
             intent.putExtra("movieId", selectedMovieId);
+            intent.putExtra("listType", mListType);
 
             view.getContext().startActivity(intent);
 
@@ -68,7 +72,7 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     public interface OnMovieSelectedListener {
-        void onMovieSelected(MovieTwo selectedMovie);
+        void onMovieSelected(Movie selectedMovie);
     }
 
 }

@@ -18,7 +18,6 @@ import android.widget.LinearLayout;
 import com.abnd.mdiaz.popularmovies.fragments.MovieDetailFragment;
 import com.abnd.mdiaz.popularmovies.fragments.MovieListFragment;
 import com.abnd.mdiaz.popularmovies.model.Movie;
-import com.abnd.mdiaz.popularmovies.model.MovieTwo;
 import com.abnd.mdiaz.popularmovies.rest.MovieLoader;
 import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
 import com.abnd.mdiaz.popularmovies.views.adapters.MovieViewHolder;
@@ -29,7 +28,7 @@ import java.util.List;
 public class MovieListActivity extends AppCompatActivity implements
         MovieViewHolder.OnMovieSelectedListener,
         MovieDetailFragment.OnDatabaseChangedListener,
-        LoaderManager.LoaderCallbacks<List<MovieTwo>> {
+        LoaderManager.LoaderCallbacks<List<Movie>> {
 
     public static final String INTER_FRAGMENT_TAG = "InterFragment";
     private static final String TAG = MovieListActivity.class.getSimpleName();
@@ -74,7 +73,7 @@ public class MovieListActivity extends AppCompatActivity implements
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
         if (networkInfo != null && networkInfo.isConnected()) {
-            getSupportLoaderManager().initLoader(0, null, null);
+            getSupportLoaderManager().initLoader(0, null, this);
             return true;
         } else {
             return false;
@@ -83,17 +82,17 @@ public class MovieListActivity extends AppCompatActivity implements
     }
 
     @Override
-    public Loader<List<MovieTwo>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
         return new MovieLoader(this.getApplicationContext(), QueryUtils.FULL_TEST_URL);
     }
 
     @Override
-    public void onLoadFinished(Loader<List<MovieTwo>> loader, List<MovieTwo> data) {
+    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
 
     }
 
     @Override
-    public void onLoaderReset(Loader<List<MovieTwo>> loader) {
+    public void onLoaderReset(Loader<List<Movie>> loader) {
 
 
     }
@@ -123,7 +122,7 @@ public class MovieListActivity extends AppCompatActivity implements
 
         if (isTwoPane) {
 
-            MovieDetailFragment movieDetailFragment = MovieDetailFragment.newInstance(selectedMovie, isTwoPane);
+            MovieDetailFragment movieDetailFragment = MovieDetailFragment.newInstance(selectedMovie.getMovieId(), isTwoPane);
 
             getSupportFragmentManager()
                     .beginTransaction()
@@ -138,6 +137,6 @@ public class MovieListActivity extends AppCompatActivity implements
         MovieListFragment movieListFragment = (MovieListFragment)
                 getSupportFragmentManager().findFragmentById(R.id.movie_list_fragment);
 
-        movieListFragment.getMovieList(INTER_FRAGMENT_TAG);
+        movieListFragment.getMovieList(QueryUtils.TOP_MOVIES_TAG);
     }
 }

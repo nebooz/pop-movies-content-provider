@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 
 import com.abnd.mdiaz.popularmovies.R;
 import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
-import com.abnd.mdiaz.popularmovies.model.MovieTwo;
+import com.abnd.mdiaz.popularmovies.model.Movie;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -30,11 +30,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
     private static final String LARGE_IMAGE_SIZE = "w500";
 
     private Context mContext;
-    private List<MovieTwo> mMovieList = new ArrayList<>();
+    private List<Movie> mMovieList = new ArrayList<>();
+    private String mListType;
 
-    public MovieAdapter(Context context, List<MovieTwo> movieList) {
+    public MovieAdapter(Context context, List<Movie> movieList, String listType) {
         mContext = context;
         mMovieList = movieList;
+        mListType = listType;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.movie_card, parent, false);
 
-        return new MovieViewHolder(v, mMovieList, mContext);
+        return new MovieViewHolder(v, mMovieList, mContext, mListType);
     }
 
     @Override
@@ -52,7 +54,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(mContext).build();
         Realm realm = Realm.getInstance(realmConfiguration);
 
-        MovieTwo currentMovie = mMovieList.get(position);
+        Movie currentMovie = mMovieList.get(position);
 
         Cursor movieCursor = queryMovieId(currentMovie.getMovieId());
 
@@ -101,7 +103,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
         return (null != mMovieList ? mMovieList.size() : 0);
     }
 
-    public void setMovieList(List<MovieTwo> movieList) {
+    public void setMovieList(List<Movie> movieList) {
 
         mMovieList.addAll(movieList);
         notifyDataSetChanged();

@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 
 import com.abnd.mdiaz.popularmovies.fragments.MovieDetailFragment;
-import com.abnd.mdiaz.popularmovies.model.Movie;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
@@ -30,15 +29,15 @@ public class MovieDetailActivity extends AppCompatActivity {
         bitmapDrawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
         activityBaseLayout.setBackground(bitmapDrawable);
 
-        Movie selectedMovie = getIntent().getParcelableExtra("selected_movie");
+        int selectedMovieId = getIntent().getIntExtra("movieId", 1);
         boolean isTablet = getIntent().getBooleanExtra("is_tablet", false);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(selectedMovie.getTitle());
+        //getSupportActionBar().setTitle(selectedMovie.getTitle());
 
         if (savedInstanceState == null) {
 
-            movieDetailFragment = MovieDetailFragment.newInstance(selectedMovie, isTablet);
+            movieDetailFragment = MovieDetailFragment.newInstance(selectedMovieId, isTablet);
 
             getSupportFragmentManager()
                     .beginTransaction()

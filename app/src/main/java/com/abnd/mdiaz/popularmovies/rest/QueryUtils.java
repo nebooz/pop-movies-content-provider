@@ -10,7 +10,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
-import com.abnd.mdiaz.popularmovies.model.MovieTwo;
+import com.abnd.mdiaz.popularmovies.model.Movie;
 import com.abnd.mdiaz.popularmovies.utils.SensitiveInfo;
 
 import org.json.JSONArray;
@@ -32,7 +32,7 @@ public class QueryUtils {
     public static final String TOP_MOVIES_TAG = "topMovies";
     public static final String POP_MOVIES_TAG = "popMovies";
     public static final String FAV_MOVIES_TAG = "favMovies";
-    private static final String LOG_TAG = QueryUtils.class.getSimpleName();
+    private static final String TAG = QueryUtils.class.getSimpleName();
     private static final String MOVIEDB_BASE_URL = "https://api.themoviedb.org/3/movie/";
     private static final String MOVIEDB_TOP_MOVIES = "top_rated";
     private static final String MOVIEDB_POP_MOVIES = "popular";
@@ -43,14 +43,14 @@ public class QueryUtils {
     private QueryUtils() {
     }
 
-    public static List<MovieTwo> fetchMovies(Context context, String url) {
+    public static List<Movie> fetchMovies(Context context, String url) {
 
         // Perform HTTP request to the URL and receive a JSON response back
         String jsonResponse = null;
         try {
             jsonResponse = httpRequest(url);
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error closing input stream", e);
+            Log.e(TAG, "Error closing input stream", e);
         }
 
         return extractMovies(context, jsonResponse);
@@ -65,7 +65,7 @@ public class QueryUtils {
         return response.body().string();
     }
 
-    public static List<MovieTwo> extractMovies(Context context, String movieJson) {
+    public static List<Movie> extractMovies(Context context, String movieJson) {
 
         try {
             //Whole thing
@@ -92,7 +92,7 @@ public class QueryUtils {
                 // Some providers return null if an error occurs, others throw an exception
                 if (null == movieCursor) {
 
-                    Log.e(LOG_TAG, "extractMovies: Query Cursor returned null!, zomg!", new SQLiteDatabaseCorruptException());
+                    Log.e(TAG, "extractMovies: Query Cursor returned null!, zomg!", new SQLiteDatabaseCorruptException());
 
                 } else if (movieCursor.getCount() < 1) {
 
@@ -121,7 +121,7 @@ public class QueryUtils {
             Log.e("QueryUtils", "Problem parsing the Movie JSON results", e);
         }
 
-        List<MovieTwo> baseList = new ArrayList<>();
+        List<Movie> baseList = new ArrayList<>();
 
         return baseList;
 
@@ -194,7 +194,7 @@ public class QueryUtils {
                 DatabaseContract.topMovieEntry.CONTENT_URI, mNewValues
         );
 
-        Log.d(LOG_TAG, String.format("insertMovie - ID:%d / Name: %s", movieDbId, movieName));
+        Log.d(TAG, String.format("insertMovie - ID:%d / Name: %s", movieDbId, movieName));
     }
 
     private static int updateMovie(Context context, String movieName, String movieReleaseDate, float movieVoteAverage, String moviePosterPath, String movieBackdropPath, String movieOverview, int movieDbId) {
@@ -220,7 +220,7 @@ public class QueryUtils {
                 mSelectionArgs
         );
 
-        Log.d(LOG_TAG, String.format("updateMovie - ID:%d / Name: %s", movieDbId, movieName));
+        Log.d(TAG, String.format("updateMovie - ID:%d / Name: %s", movieDbId, movieName));
 
         return mRowsUpdated;
     }
@@ -235,6 +235,41 @@ public class QueryUtils {
             }
         }
         return null;
+    }
+
+    public static Boolean isFavorite(Context context, int movieDbId) {
+
+        String[] mProjection = {DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID};
+
+        String mSelectionClause = DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
+
+        String[] mSelectionArgs = {String.valueOf(movieDbId)};
+
+        Cursor cursor = context.getContentResolver().query(
+                DatabaseContract.favMovieEntry.CONTENT_URI,
+                mProjection,
+                mSelectionClause,
+                mSelectionArgs,
+                null);
+
+        if (null == cursor) {
+
+            Log.e(TAG, "isFavorite: Query Cursor returned null!, zomg!", new SQLiteDatabaseCorruptException());
+            return false;
+
+        } else if (cursor.getCount() < 1) {
+
+            cursor.close();
+            return false;
+
+        } else {
+
+            //Movie in Favorites
+            cursor.close();
+            return true;
+
+        }
+
     }
 
 }
