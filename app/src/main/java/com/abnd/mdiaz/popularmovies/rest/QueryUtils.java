@@ -37,7 +37,21 @@ public class QueryUtils {
     private static final String MOVIEDB_TOP_MOVIES = "top_rated";
     private static final String MOVIEDB_POP_MOVIES = "popular";
     private static final String MOVIEDB_API_KEY = "?api_key=";
-    public static final String FULL_TEST_URL = new StringBuilder().append(MOVIEDB_BASE_URL).append(MOVIEDB_TOP_MOVIES).append(MOVIEDB_API_KEY).append(SensitiveInfo.getMoviesApiKey()).toString();
+
+    public static final String TOP_MOVIES_URL = new StringBuilder()
+            .append(MOVIEDB_BASE_URL)
+            .append(MOVIEDB_TOP_MOVIES)
+            .append(MOVIEDB_API_KEY)
+            .append(SensitiveInfo.getMoviesApiKey())
+            .toString();
+
+    public static final String POP_MOVIES_URL = new StringBuilder()
+            .append(MOVIEDB_BASE_URL)
+            .append(MOVIEDB_POP_MOVIES)
+            .append(MOVIEDB_API_KEY)
+            .append(SensitiveInfo.getMoviesApiKey())
+            .toString();
+
     private static OkHttpClient client = new OkHttpClient();
 
     private QueryUtils() {

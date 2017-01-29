@@ -7,28 +7,24 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.fragments.MovieDetailFragment;
 import com.abnd.mdiaz.popularmovies.fragments.MovieListFragment;
 import com.abnd.mdiaz.popularmovies.model.Movie;
-import com.abnd.mdiaz.popularmovies.rest.MovieLoader;
 import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
 import com.abnd.mdiaz.popularmovies.views.adapters.MovieViewHolder;
-
-import java.util.List;
 
 
 public class MovieListActivity extends AppCompatActivity implements
         MovieViewHolder.OnMovieSelectedListener,
-        MovieDetailFragment.OnDatabaseChangedListener,
-        LoaderManager.LoaderCallbacks<List<Movie>> {
+        MovieDetailFragment.OnDatabaseChangedListener {
 
     public static final String INTER_FRAGMENT_TAG = "InterFragment";
     private static final String TAG = MovieListActivity.class.getSimpleName();
@@ -73,30 +69,17 @@ public class MovieListActivity extends AppCompatActivity implements
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
         if (networkInfo != null && networkInfo.isConnected()) {
-            getSupportLoaderManager().initLoader(0, null, this);
+
+            new PopulateDatabase().execute(QueryUtils.TOP_MOVIES_URL, QueryUtils.POP_MOVIES_URL);
             return true;
+
         } else {
+
             return false;
+
         }
 
     }
-
-    @Override
-    public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
-        return new MovieLoader(this.getApplicationContext(), QueryUtils.FULL_TEST_URL);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<Movie>> loader) {
-
-
-    }
-
 
     public boolean isTablet() {
         return isTwoPane;
@@ -138,5 +121,34 @@ public class MovieListActivity extends AppCompatActivity implements
                 getSupportFragmentManager().findFragmentById(R.id.movie_list_fragment);
 
         movieListFragment.getMovieList(QueryUtils.TOP_MOVIES_TAG);
+    }
+
+    private class PopulateDatabase extends AsyncTask<String, Integer, Boolean> {
+        protected Boolean doInBackground(String... urls) {
+
+            int count = urls.length;
+
+            for (int i = 0; i < count; i++) {
+
+                QueryUtils.fetchMovies(getApplicationContext(), urls[i]);
+
+                publishProgress((int) ((i / (float) count) * 100));
+
+            }
+
+            return true;
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
+
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+            if (result) {
+                Toast.makeText(MovieListActivity.this, "Movies Acquired Succesfully", Toast.LENGTH_SHORT).show();
+            }
+
+        }
     }
 }

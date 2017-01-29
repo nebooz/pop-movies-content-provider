@@ -206,6 +206,8 @@ public class MovieDetailFragment extends Fragment {
         mMovieSynopsis = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW));
         mMovieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID));
 
+        cursor.close();
+
         //Proper date
         mMovieReleaseDate = this.getString(R.string.release_date) + dateFormat(preFixedReleaseDate);
 
