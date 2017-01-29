@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
-import com.abnd.mdiaz.popularmovies.model.Movie;
 import com.abnd.mdiaz.popularmovies.utils.SensitiveInfo;
 
 import org.json.JSONArray;
@@ -20,8 +19,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -57,7 +54,7 @@ public class QueryUtils {
     private QueryUtils() {
     }
 
-    public static List<Movie> fetchMovies(Context context, String url) {
+    public static void fetchMovies(Context context, String url, String movieTable) {
 
         // Perform HTTP request to the URL and receive a JSON response back
         String jsonResponse = null;
@@ -67,7 +64,7 @@ public class QueryUtils {
             Log.e(TAG, "Error closing input stream", e);
         }
 
-        return extractMovies(context, jsonResponse);
+        extractMovies(context, jsonResponse, movieTable);
     }
 
     private static String httpRequest(String url) throws IOException {
@@ -79,7 +76,7 @@ public class QueryUtils {
         return response.body().string();
     }
 
-    public static List<Movie> extractMovies(Context context, String movieJson) {
+    public static void extractMovies(Context context, String movieJson, String movieTable) {
 
         try {
             //Whole thing
@@ -101,7 +98,7 @@ public class QueryUtils {
                 String movieOverview = movieObject.getString("overview");
                 int movieDbId = movieObject.getInt("id");
 
-                Cursor movieCursor = queryMovieId(context, movieDbId);
+                Cursor movieCursor = queryMovieId(context, movieDbId, movieTable);
 
                 // Some providers return null if an error occurs, others throw an exception
                 if (null == movieCursor) {
@@ -114,7 +111,7 @@ public class QueryUtils {
 
                     movieCursor.close();
 
-                    insertMovie(context, movieName, movieReleaseDate, movieVoteAverage, moviePosterPath, movieBackdropPath, movieOverview, movieDbId);
+                    insertMovie(context, movieTable, movieName, movieReleaseDate, movieVoteAverage, moviePosterPath, movieBackdropPath, movieOverview, movieDbId);
 
                 } else {
 
@@ -122,7 +119,7 @@ public class QueryUtils {
 
                     movieCursor.close();
 
-                    updateMovie(context, movieName, movieReleaseDate, movieVoteAverage, moviePosterPath, movieBackdropPath, movieOverview, movieDbId);
+                    updateMovie(context, movieName, movieTable, movieReleaseDate, movieVoteAverage, moviePosterPath, movieBackdropPath, movieOverview, movieDbId);
 
                 }
 
@@ -134,10 +131,6 @@ public class QueryUtils {
             // with the message from the exception.
             Log.e("QueryUtils", "Problem parsing the Movie JSON results", e);
         }
-
-        List<Movie> baseList = new ArrayList<>();
-
-        return baseList;
 
     }
 
@@ -168,13 +161,35 @@ public class QueryUtils {
                 null);
     }
 
-    private static Cursor queryMovieId(Context context, int movieDbId) {
+    private static Cursor queryMovieId(Context context, int movieDbId, String movieTable) {
         // A "projection" defines the columns that will be returned for each row
         // Contract class constant for the MOVIEDB_ID column name
-        String[] mProjection = {DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID};
+
+        String databaseColumn;
+        Uri databaseUri;
+
+        switch (movieTable) {
+            case QueryUtils.TOP_MOVIES_TAG:
+                databaseColumn = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID;
+                databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
+
+                break;
+            case QueryUtils.POP_MOVIES_TAG:
+                databaseColumn = DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID;
+                databaseUri = DatabaseContract.popMovieEntry.CONTENT_URI;
+
+                break;
+            default:
+                databaseColumn = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID;
+                databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
+
+                break;
+        }
+
+        String[] mProjection = {databaseColumn};
 
         // Constructs a selection clause that matches the current Movie ID
-        String mSelectionClause = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
+        String mSelectionClause = new StringBuilder().append(databaseColumn).append(" = ?").toString();
 
         // Moves the current Movie ID to the selection arguments
         String[] mSelectionArgs = {String.valueOf(movieDbId)};
@@ -182,61 +197,115 @@ public class QueryUtils {
         // Does a query against the table and returns a Cursor object
 
         return context.getContentResolver().query(
-                DatabaseContract.topMovieEntry.CONTENT_URI,
+                databaseUri,
                 mProjection,
                 mSelectionClause,
                 mSelectionArgs,
                 null);
     }
 
-    private static void insertMovie(Context context, String movieName, String movieReleaseDate, float movieVoteAverage, String moviePosterPath, String movieBackdropPath, String movieOverview, int movieDbId) {
-        // Defines a new Uri object that receives the result of the insertion
-        Uri mNewUri;
+    private static void insertMovie(Context context, String movieTable, String movieName, String movieReleaseDate, float movieVoteAverage, String moviePosterPath, String movieBackdropPath, String movieOverview, int movieDbId) {
 
         // Defines an object to contain the new values to insert
         ContentValues mNewValues = new ContentValues();
 
-        mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_NAME, movieName);
-        mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE, movieReleaseDate);
-        mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE, movieVoteAverage);
-        mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH, moviePosterPath);
-        mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH, movieBackdropPath);
-        mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW, movieOverview);
-        mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID, movieDbId);
+        Uri databaseUri;
 
-        mNewUri = context.getContentResolver().insert(
-                DatabaseContract.topMovieEntry.CONTENT_URI, mNewValues
-        );
+        switch (movieTable) {
+            case QueryUtils.TOP_MOVIES_TAG:
+                databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_NAME, movieName);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE, movieReleaseDate);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE, movieVoteAverage);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH, moviePosterPath);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH, movieBackdropPath);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW, movieOverview);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID, movieDbId);
+                break;
 
-        Log.d(TAG, String.format("insertMovie - ID:%d / Name: %s", movieDbId, movieName));
+            case QueryUtils.POP_MOVIES_TAG:
+                databaseUri = DatabaseContract.popMovieEntry.CONTENT_URI;
+                mNewValues.put(DatabaseContract.popMovieEntry.COLUMN_NAME, movieName);
+                mNewValues.put(DatabaseContract.popMovieEntry.COLUMN_RELEASE_DATE, movieReleaseDate);
+                mNewValues.put(DatabaseContract.popMovieEntry.COLUMN_VOTE_AVERAGE, movieVoteAverage);
+                mNewValues.put(DatabaseContract.popMovieEntry.COLUMN_POSTER_PATH, moviePosterPath);
+                mNewValues.put(DatabaseContract.popMovieEntry.COLUMN_BACKDROP_PATH, movieBackdropPath);
+                mNewValues.put(DatabaseContract.popMovieEntry.COLUMN_OVERVIEW, movieOverview);
+                mNewValues.put(DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID, movieDbId);
+                break;
+
+            default:
+                databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_NAME, movieName);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE, movieReleaseDate);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE, movieVoteAverage);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH, moviePosterPath);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH, movieBackdropPath);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW, movieOverview);
+                mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID, movieDbId);
+                break;
+        }
+
+        context.getContentResolver().insert(databaseUri, mNewValues);
+
+        Log.d(TAG, String.format("insertMovie - Table: %s / ID: %d / Name: %s", movieTable, movieDbId, movieName));
     }
 
-    private static int updateMovie(Context context, String movieName, String movieReleaseDate, float movieVoteAverage, String moviePosterPath, String movieBackdropPath, String movieOverview, int movieDbId) {
-
-        int mRowsUpdated = 0;
+    private static void updateMovie(Context context, String movieTable, String movieName, String movieReleaseDate, float movieVoteAverage, String moviePosterPath, String movieBackdropPath, String movieOverview, int movieDbId) {
 
         ContentValues mUpdateValues = new ContentValues();
+        Uri databaseUri;
+        String databaseColumn;
 
-        String mSelectionClause = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
+        switch (movieTable) {
+            case QueryUtils.TOP_MOVIES_TAG:
+                databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
+                databaseColumn = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID;
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_NAME, movieName);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE, movieReleaseDate);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE, movieVoteAverage);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH, moviePosterPath);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH, movieBackdropPath);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW, movieOverview);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID, movieDbId);
+                break;
+
+            case QueryUtils.POP_MOVIES_TAG:
+                databaseUri = DatabaseContract.popMovieEntry.CONTENT_URI;
+                databaseColumn = DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID;
+                mUpdateValues.put(DatabaseContract.popMovieEntry.COLUMN_NAME, movieName);
+                mUpdateValues.put(DatabaseContract.popMovieEntry.COLUMN_RELEASE_DATE, movieReleaseDate);
+                mUpdateValues.put(DatabaseContract.popMovieEntry.COLUMN_VOTE_AVERAGE, movieVoteAverage);
+                mUpdateValues.put(DatabaseContract.popMovieEntry.COLUMN_POSTER_PATH, moviePosterPath);
+                mUpdateValues.put(DatabaseContract.popMovieEntry.COLUMN_BACKDROP_PATH, movieBackdropPath);
+                mUpdateValues.put(DatabaseContract.popMovieEntry.COLUMN_OVERVIEW, movieOverview);
+                mUpdateValues.put(DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID, movieDbId);
+                break;
+
+            default:
+                databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
+                databaseColumn = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID;
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_NAME, movieName);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE, movieReleaseDate);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE, movieVoteAverage);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH, moviePosterPath);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH, movieBackdropPath);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW, movieOverview);
+                mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID, movieDbId);
+                break;
+        }
+
+        String mSelectionClause = databaseColumn + " = ?";
         String[] mSelectionArgs = {String.valueOf(movieDbId)};
 
-        mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_NAME, movieName);
-        mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE, movieReleaseDate);
-        mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE, movieVoteAverage);
-        mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH, moviePosterPath);
-        mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH, movieBackdropPath);
-        mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW, movieOverview);
-
-        mRowsUpdated = context.getContentResolver().update(
-                DatabaseContract.topMovieEntry.CONTENT_URI,
+        context.getContentResolver().update(
+                databaseUri,
                 mUpdateValues,
                 mSelectionClause,
                 mSelectionArgs
         );
 
-        Log.d(TAG, String.format("updateMovie - ID:%d / Name: %s", movieDbId, movieName));
-
-        return mRowsUpdated;
+        Log.d(TAG, String.format("updateMovie - Table: %s / ID: %d / Name: %s", movieTable, movieDbId, movieName));
     }
 
     private static Bitmap getBitmap(String thumbnail) {

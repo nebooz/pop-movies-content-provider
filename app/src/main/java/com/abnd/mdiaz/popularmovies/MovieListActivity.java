@@ -127,10 +127,17 @@ public class MovieListActivity extends AppCompatActivity implements
         protected Boolean doInBackground(String... urls) {
 
             int count = urls.length;
+            String movieTable;
 
             for (int i = 0; i < count; i++) {
 
-                QueryUtils.fetchMovies(getApplicationContext(), urls[i]);
+                if (urls[i].equals(QueryUtils.TOP_MOVIES_URL)) {
+                    movieTable = QueryUtils.TOP_MOVIES_TAG;
+                } else {
+                    movieTable = QueryUtils.POP_MOVIES_TAG;
+                }
+
+                QueryUtils.fetchMovies(getApplicationContext(), urls[i], movieTable);
 
                 publishProgress((int) ((i / (float) count) * 100));
 
@@ -146,7 +153,7 @@ public class MovieListActivity extends AppCompatActivity implements
         protected void onPostExecute(Boolean result) {
 
             if (result) {
-                Toast.makeText(MovieListActivity.this, "Movies Acquired Succesfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MovieListActivity.this, "Movies Acquired Successfully", Toast.LENGTH_SHORT).show();
             }
 
         }
