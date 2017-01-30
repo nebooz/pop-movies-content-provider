@@ -1,19 +1,14 @@
 package com.abnd.mdiaz.popularmovies;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.fragments.MovieDetailFragment;
 import com.abnd.mdiaz.popularmovies.fragments.MovieListFragment;
@@ -34,9 +29,6 @@ public class MovieListActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //Check online status before updating the DB with movies
-        boolean isConnected = checkConnectivity();
 
         setContentView(R.layout.activity_movie_list);
 
@@ -60,24 +52,6 @@ public class MovieListActivity extends AppCompatActivity implements
         BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bmp);
         bitmapDrawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
         activityBaseLayout.setBackground(bitmapDrawable);
-
-    }
-
-    private boolean checkConnectivity() {
-        ConnectivityManager connectivityManager = (ConnectivityManager)
-                this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-
-        if (networkInfo != null && networkInfo.isConnected()) {
-
-            new PopulateDatabase().execute(QueryUtils.TOP_MOVIES_URL, QueryUtils.POP_MOVIES_URL);
-            return true;
-
-        } else {
-
-            return false;
-
-        }
 
     }
 
@@ -123,39 +97,4 @@ public class MovieListActivity extends AppCompatActivity implements
         movieListFragment.getMovieList(QueryUtils.TOP_MOVIES_TAG);
     }
 
-    private class PopulateDatabase extends AsyncTask<String, Integer, Boolean> {
-        protected Boolean doInBackground(String... urls) {
-
-            int count = urls.length;
-            String movieTable;
-
-            for (int i = 0; i < count; i++) {
-
-                if (urls[i].equals(QueryUtils.TOP_MOVIES_URL)) {
-                    movieTable = QueryUtils.TOP_MOVIES_TAG;
-                } else {
-                    movieTable = QueryUtils.POP_MOVIES_TAG;
-                }
-
-                QueryUtils.fetchMovies(getApplicationContext(), urls[i], movieTable);
-
-                publishProgress((int) ((i / (float) count) * 100));
-
-            }
-
-            return true;
-        }
-
-        protected void onProgressUpdate(Integer... progress) {
-
-        }
-
-        protected void onPostExecute(Boolean result) {
-
-            if (result) {
-                Toast.makeText(MovieListActivity.this, "Movies Acquired Successfully", Toast.LENGTH_SHORT).show();
-            }
-
-        }
-    }
 }

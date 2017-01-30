@@ -565,7 +565,6 @@ public class MovieDetailFragment extends Fragment {
 
     }
 
-
     public interface OnDatabaseChangedListener {
         void onDatabaseUpdate();
     }

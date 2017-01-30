@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -95,6 +96,8 @@ public class MovieListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        new PopulateDatabase().execute(QueryUtils.TOP_MOVIES_URL, QueryUtils.POP_MOVIES_URL);
 
         if (validConnection) {
 
@@ -313,6 +316,45 @@ public class MovieListFragment extends Fragment {
 
         loadAdapter(getMoviesFromDb(listType));
 
+    }
+
+    private class PopulateDatabase extends AsyncTask<String, Integer, Boolean> {
+        protected Boolean doInBackground(String... urls) {
+
+            int count = urls.length;
+            String movieTable;
+
+            for (int i = 0; i < count; i++) {
+
+                if (urls[i].equals(QueryUtils.TOP_MOVIES_URL)) {
+                    movieTable = QueryUtils.TOP_MOVIES_TAG;
+                } else {
+                    movieTable = QueryUtils.POP_MOVIES_TAG;
+                }
+
+                QueryUtils.fetchMovies(getContext(), urls[i], movieTable);
+
+                publishProgress((int) ((i / (float) count) * 100));
+
+            }
+
+            return true;
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
+
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+            getMovieList(mListType);
+
+            if (result) {
+                Toast.makeText(getContext(), "Movies Acquired Successfully", Toast.LENGTH_SHORT).show();
+
+            }
+
+        }
     }
 
 }
