@@ -56,7 +56,7 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         if (isTablet) {
 
-            listener.onMovieSelected(selectedMovie);
+            listener.onMovieSelected(selectedMovie, mListType);
 
         } else {
 
@@ -72,7 +72,7 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     public interface OnMovieSelectedListener {
-        void onMovieSelected(Movie selectedMovie);
+        void onMovieSelected(Movie selectedMovie, String movieTable);
     }
 
 }

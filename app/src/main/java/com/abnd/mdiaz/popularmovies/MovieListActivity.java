@@ -75,11 +75,11 @@ public class MovieListActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onMovieSelected(Movie selectedMovie) {
+    public void onMovieSelected(Movie selectedMovie, String movieTable) {
 
         if (isTwoPane) {
 
-            MovieDetailFragment movieDetailFragment = MovieDetailFragment.newInstance(selectedMovie.getMovieId(), isTwoPane);
+            MovieDetailFragment movieDetailFragment = MovieDetailFragment.newInstance(selectedMovie.getMovieId(), movieTable, isTwoPane);
 
             getSupportFragmentManager()
                     .beginTransaction()

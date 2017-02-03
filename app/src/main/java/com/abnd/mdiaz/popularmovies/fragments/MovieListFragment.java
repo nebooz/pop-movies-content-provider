@@ -24,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.R;
-import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
 import com.abnd.mdiaz.popularmovies.model.Movie;
 import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
 import com.abnd.mdiaz.popularmovies.utils.MarginDecoration;
@@ -237,76 +236,17 @@ public class MovieListFragment extends Fragment {
 
         List<Movie> movieList = new ArrayList<>();
 
-        Cursor cursor = QueryUtils.queryAllMovies(getContext(), movieTable);
-
-        try {
+        try (Cursor cursor = QueryUtils.queryAllMovies(getContext(), movieTable)) {
             while (cursor.moveToNext()) {
 
-                String movieTitle;
-                String movieReleaseDate;
-                float movieVoteAverage;
-                String moviePosterPath;
-                String movieBackdropPath;
-                String movieOverview;
-                int movieId;
+                Movie movie = QueryUtils.buildMovieFromCursor(cursor, movieTable);
 
-                switch (movieTable) {
-                    case TOP_MOVIES_TAG:
-                        movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_NAME));
-                        movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE));
-                        movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE));
-                        moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH));
-                        movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH));
-                        movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW));
-                        movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID));
-                        break;
-                    case POP_MOVIES_TAG:
-                        movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_NAME));
-                        movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_RELEASE_DATE));
-                        movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_VOTE_AVERAGE));
-                        moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_POSTER_PATH));
-                        movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_BACKDROP_PATH));
-                        movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_OVERVIEW));
-                        movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID));
-                        break;
-                    case FAV_MOVIES_TAG:
-                        movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_NAME));
-                        movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_RELEASE_DATE));
-                        movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_VOTE_AVERAGE));
-                        moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_POSTER_PATH));
-                        movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_BACKDROP_PATH));
-                        movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_OVERVIEW));
-                        movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID));
-                        break;
-                    default:
-                        movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_NAME));
-                        movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE));
-                        movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE));
-                        moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH));
-                        movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH));
-                        movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW));
-                        movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID));
-                        break;
+                movieList.add(movie);
 
-                }
-
-                movieList.add(new Movie(
-                        movieTitle,
-                        movieReleaseDate,
-                        movieVoteAverage,
-                        moviePosterPath,
-                        movieBackdropPath,
-                        movieOverview,
-                        movieId
-                ));
-
-                Log.d(TAG, "getMoviesFromDb: " + movieTitle + " - Movie Added!");
+                Log.d(TAG, "getMoviesFromDb: " + movie.getTitle() + " - Movie Added!");
 
             }
-        } finally {
-            cursor.close();
         }
-
 
         return movieList;
 
@@ -355,6 +295,7 @@ public class MovieListFragment extends Fragment {
             }
 
         }
+
     }
 
 }

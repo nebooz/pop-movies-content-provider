@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
+import com.abnd.mdiaz.popularmovies.model.Movie;
 import com.abnd.mdiaz.popularmovies.utils.SensitiveInfo;
 
 import org.json.JSONArray;
@@ -161,7 +162,7 @@ public class QueryUtils {
                 null);
     }
 
-    private static Cursor queryMovieId(Context context, int movieDbId, String movieTable) {
+    public static Cursor queryMovieId(Context context, int movieDbId, String movieTable) {
         // A "projection" defines the columns that will be returned for each row
         // Contract class constant for the MOVIEDB_ID column name
 
@@ -196,12 +197,77 @@ public class QueryUtils {
 
         // Does a query against the table and returns a Cursor object
 
-        return context.getContentResolver().query(
+        Cursor cursor = context.getContentResolver().query(
                 databaseUri,
-                mProjection,
+                //mProjection,
+                null,
                 mSelectionClause,
                 mSelectionArgs,
                 null);
+
+        return cursor;
+    }
+
+    public static Movie buildMovieFromCursor(Cursor cursor, String movieTable) {
+
+        String movieTitle;
+        String movieReleaseDate;
+        float movieVoteAverage;
+        String moviePosterPath;
+        String movieBackdropPath;
+        String movieOverview;
+        int movieId;
+
+        switch (movieTable) {
+            case TOP_MOVIES_TAG:
+                movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_NAME));
+                movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE));
+                movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE));
+                moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH));
+                movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH));
+                movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW));
+                movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID));
+                break;
+            case POP_MOVIES_TAG:
+                movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_NAME));
+                movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_RELEASE_DATE));
+                movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_VOTE_AVERAGE));
+                moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_POSTER_PATH));
+                movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_BACKDROP_PATH));
+                movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_OVERVIEW));
+                movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID));
+                break;
+            case FAV_MOVIES_TAG:
+                movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_NAME));
+                movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_RELEASE_DATE));
+                movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_VOTE_AVERAGE));
+                moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_POSTER_PATH));
+                movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_BACKDROP_PATH));
+                movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_OVERVIEW));
+                movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID));
+                break;
+            default:
+                movieTitle = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_NAME));
+                movieReleaseDate = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE));
+                movieVoteAverage = cursor.getFloat(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE));
+                moviePosterPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_POSTER_PATH));
+                movieBackdropPath = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_BACKDROP_PATH));
+                movieOverview = cursor.getString(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_OVERVIEW));
+                movieId = cursor.getInt(cursor.getColumnIndex(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID));
+                break;
+
+        }
+
+        return new Movie(
+                movieTitle,
+                movieReleaseDate,
+                movieVoteAverage,
+                moviePosterPath,
+                movieBackdropPath,
+                movieOverview,
+                movieId
+        );
+
     }
 
     private static void insertMovie(Context context, String movieTable, String movieName, String movieReleaseDate, float movieVoteAverage, String moviePosterPath, String movieBackdropPath, String movieOverview, int movieDbId) {

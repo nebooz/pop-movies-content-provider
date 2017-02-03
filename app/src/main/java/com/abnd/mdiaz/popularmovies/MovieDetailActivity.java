@@ -30,6 +30,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         activityBaseLayout.setBackground(bitmapDrawable);
 
         int selectedMovieId = getIntent().getIntExtra("movieId", 1);
+        String movieTable = getIntent().getStringExtra("listType");
         boolean isTablet = getIntent().getBooleanExtra("is_tablet", false);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -37,7 +38,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
 
-            movieDetailFragment = MovieDetailFragment.newInstance(selectedMovieId, isTablet);
+            movieDetailFragment = MovieDetailFragment.newInstance(selectedMovieId, movieTable, isTablet);
 
             getSupportFragmentManager()
                     .beginTransaction()
