@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
@@ -20,6 +21,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -77,7 +80,7 @@ public class QueryUtils {
         return response.body().string();
     }
 
-    public static void extractMovies(Context context, String movieJson, String movieTable) {
+    private static void extractMovies(Context context, String movieJson, String movieTable) {
 
         try {
             //Whole thing
@@ -99,26 +102,13 @@ public class QueryUtils {
                 String movieOverview = movieObject.getString("overview");
                 int movieDbId = movieObject.getInt("id");
 
-                Cursor movieCursor = queryMovieId(context, movieDbId, movieTable);
+                Movie movie = queryMovieId(context, movieDbId, movieTable);
 
-                // Some providers return null if an error occurs, others throw an exception
-                if (null == movieCursor) {
-
-                    Log.e(TAG, "extractMovies: Query Cursor returned null!, zomg!", new SQLiteDatabaseCorruptException());
-
-                } else if (movieCursor.getCount() < 1) {
-
-                    //No Matches
-
-                    movieCursor.close();
+                if (movie == null) {
 
                     insertMovie(context, movieTable, movieName, movieReleaseDate, movieVoteAverage, moviePosterPath, movieBackdropPath, movieOverview, movieDbId);
 
                 } else {
-
-                    //Movie already in the DB
-
-                    movieCursor.close();
 
                     updateMovie(context, movieName, movieTable, movieReleaseDate, movieVoteAverage, moviePosterPath, movieBackdropPath, movieOverview, movieDbId);
 
@@ -135,7 +125,7 @@ public class QueryUtils {
 
     }
 
-    public static Cursor queryAllMovies(Context context, String movieTable) {
+    public static List<Movie> queryAllMovies(Context context, String movieTable) {
 
         Uri movieTableUri;
 
@@ -154,15 +144,29 @@ public class QueryUtils {
                 break;
         }
 
-        return context.getContentResolver().query(
+        Cursor cursor = context.getContentResolver().query(
                 movieTableUri,
                 null,
                 null,
                 null,
                 null);
+
+        List<Movie> movieList = new ArrayList<>();
+
+        assert cursor != null;
+
+        while (cursor.moveToNext()) {
+
+            movieList.add(getMovie(movieTable, cursor));
+
+        }
+
+        cursor.close();
+
+        return movieList;
     }
 
-    public static Cursor queryMovieId(Context context, int movieDbId, String movieTable) {
+    public static Movie queryMovieId(Context context, int movieDbId, String movieTable) {
         // A "projection" defines the columns that will be returned for each row
         // Contract class constant for the MOVIEDB_ID column name
 
@@ -173,21 +177,19 @@ public class QueryUtils {
             case QueryUtils.TOP_MOVIES_TAG:
                 databaseColumn = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID;
                 databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
-
                 break;
+
             case QueryUtils.POP_MOVIES_TAG:
                 databaseColumn = DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID;
                 databaseUri = DatabaseContract.popMovieEntry.CONTENT_URI;
-
                 break;
+
             default:
                 databaseColumn = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID;
                 databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
 
                 break;
         }
-
-        String[] mProjection = {databaseColumn};
 
         // Constructs a selection clause that matches the current Movie ID
         String mSelectionClause = new StringBuilder().append(databaseColumn).append(" = ?").toString();
@@ -196,19 +198,31 @@ public class QueryUtils {
         String[] mSelectionArgs = {String.valueOf(movieDbId)};
 
         // Does a query against the table and returns a Cursor object
-
         Cursor cursor = context.getContentResolver().query(
                 databaseUri,
-                //mProjection,
                 null,
                 mSelectionClause,
                 mSelectionArgs,
                 null);
 
-        return cursor;
+        if ((cursor != null ? cursor.getCount() : 0) > 0) {
+
+            cursor.moveToFirst();
+            Movie movie = getMovie(movieTable, cursor);
+            cursor.close();
+
+            return movie;
+
+        } else {
+
+            cursor.close();
+            return null;
+        }
+
     }
 
-    public static Movie buildMovieFromCursor(Cursor cursor, String movieTable) {
+    @NonNull
+    private static Movie getMovie(String movieTable, Cursor cursor) {
 
         String movieTitle;
         String movieReleaseDate;
@@ -258,6 +272,8 @@ public class QueryUtils {
 
         }
 
+        //cursor.close();
+
         return new Movie(
                 movieTitle,
                 movieReleaseDate,
@@ -267,7 +283,6 @@ public class QueryUtils {
                 movieOverview,
                 movieId
         );
-
     }
 
     private static void insertMovie(Context context, String movieTable, String movieName, String movieReleaseDate, float movieVoteAverage, String moviePosterPath, String movieBackdropPath, String movieOverview, int movieDbId) {

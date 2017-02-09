@@ -3,6 +3,7 @@ package com.abnd.mdiaz.popularmovies.views.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -13,7 +14,9 @@ import com.abnd.mdiaz.popularmovies.model.Movie;
 
 import java.util.List;
 
-public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+    private static final String TAG = MovieViewHolder.class.getSimpleName();
 
     protected ImageView movieThumbnail;
     protected ImageView favoriteTag;
@@ -63,6 +66,9 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
             Intent intent = new Intent(view.getContext(), MovieDetailActivity.class);
             intent.putExtra("is_tablet", false);
             intent.putExtra("movieId", selectedMovieId);
+
+            Log.d(TAG, "Viewholder - onClick / ListType value: " + mListType);
+
             intent.putExtra("listType", mListType);
 
             view.getContext().startActivity(intent);

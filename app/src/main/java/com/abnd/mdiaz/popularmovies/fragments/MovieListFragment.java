@@ -2,7 +2,6 @@ package com.abnd.mdiaz.popularmovies.fragments;
 
 
 import android.content.Context;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -232,29 +231,9 @@ public class MovieListFragment extends Fragment {
 
     }
 
-    private List<Movie> getMoviesFromDb(String movieTable) {
-
-        List<Movie> movieList = new ArrayList<>();
-
-        try (Cursor cursor = QueryUtils.queryAllMovies(getContext(), movieTable)) {
-            while (cursor.moveToNext()) {
-
-                Movie movie = QueryUtils.buildMovieFromCursor(cursor, movieTable);
-
-                movieList.add(movie);
-
-                Log.d(TAG, "getMoviesFromDb: " + movie.getTitle() + " - Movie Added!");
-
-            }
-        }
-
-        return movieList;
-
-    }
-
     public void getMovieList(String listType) {
 
-        loadAdapter(getMoviesFromDb(listType));
+        loadAdapter(QueryUtils.queryAllMovies(getContext(), listType));
 
     }
 

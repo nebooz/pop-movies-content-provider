@@ -3,7 +3,6 @@ package com.abnd.mdiaz.popularmovies.fragments;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -129,10 +128,10 @@ public class MovieDetailFragment extends Fragment {
         mMovieId = getArguments().getInt("movieId", 1);
         String listType = getArguments().getString("movieTable", QueryUtils.TOP_MOVIES_TAG);
 
-        // TODO: 03-Feb-17 This seems dumb... change it so we get a Movie object by mixing these two methods.
-        Cursor cursor = QueryUtils.queryMovieId(getContext(), mMovieId, listType);
-        cursor.moveToNext();
-        Movie selectedMovie = QueryUtils.buildMovieFromCursor(cursor, listType);
+        Log.d(TAG, "onCreate - listType value: " + listType);
+
+
+        Movie selectedMovie = QueryUtils.queryMovieId(getContext(), mMovieId, listType);
 
         mMovieName = selectedMovie.getTitle();
         String preFixedReleaseDate = selectedMovie.getReleaseDate();
