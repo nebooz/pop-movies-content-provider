@@ -103,6 +103,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
         return (null != mMovieList ? mMovieList.size() : 0);
     }
 
+    public void setListType(String listType) {
+        mListType = listType;
+        Log.d(TAG, "setListType: ListType Value: " + listType);
+    }
+
     public void setMovieList(List<Movie> movieList) {
 
         mMovieList.addAll(movieList);

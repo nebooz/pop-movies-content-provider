@@ -110,7 +110,7 @@ public class QueryUtils {
 
                 } else {
 
-                    updateMovie(context, movieName, movieTable, movieReleaseDate, movieVoteAverage, moviePosterPath, movieBackdropPath, movieOverview, movieDbId);
+                    updateMovie(context, movieTable, movieName, movieReleaseDate, movieVoteAverage, moviePosterPath, movieBackdropPath, movieOverview, movieDbId);
 
                 }
 

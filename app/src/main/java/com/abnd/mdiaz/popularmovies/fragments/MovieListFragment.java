@@ -95,6 +95,8 @@ public class MovieListFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.d(TAG, "onCreate: MovieListFragment OnCreate!");
+
         new PopulateDatabase().execute(QueryUtils.TOP_MOVIES_URL, QueryUtils.POP_MOVIES_URL);
 
         if (validConnection) {
@@ -176,24 +178,39 @@ public class MovieListFragment extends Fragment {
                     break;
                 }
                 mListType = TOP_MOVIES_TAG;
+
+                mAdapter = new MovieAdapter(getContext(), new ArrayList<Movie>(), mListType);
+                mRecyclerView.setAdapter(mAdapter);
                 getMovieList(mListType);
+
                 break;
+
             case R.id.menu_pop_movies:
                 if (Objects.equals(mListType, POP_MOVIES_TAG)) {
                     Toast.makeText(getContext(), "You are looking at the Popular Movies list.", Toast.LENGTH_SHORT).show();
                     break;
                 }
                 mListType = POP_MOVIES_TAG;
+
+                mAdapter = new MovieAdapter(getContext(), new ArrayList<Movie>(), mListType);
+                mRecyclerView.setAdapter(mAdapter);
                 getMovieList(mListType);
+
                 break;
+
             case R.id.menu_fav_movies:
                 if (Objects.equals(mListType, FAV_MOVIES_TAG)) {
                     Toast.makeText(getContext(), "You are looking at the Favorite Movies list.", Toast.LENGTH_SHORT).show();
                     break;
                 }
                 mListType = FAV_MOVIES_TAG;
+
+                mAdapter = new MovieAdapter(getContext(), new ArrayList<Movie>(), mListType);
+                mRecyclerView.setAdapter(mAdapter);
                 getMovieList(mListType);
+
                 break;
+
             case R.id.menu_add_favs:
                 if (!Objects.equals(mListType, FAV_MOVIES_TAG)) {
 
@@ -212,6 +229,7 @@ public class MovieListFragment extends Fragment {
     private void loadAdapter(List<Movie> baseMovieList) {
 
         mAdapter.clearData();
+        mAdapter.setListType(mListType);
         mAdapter.setMovieList(baseMovieList);
 
         switch (mListType) {

@@ -11,6 +11,8 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.ColorUtils;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,6 +51,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.FAV_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.POP_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.TOP_MOVIES_TAG;
+
 public class MovieDetailFragment extends Fragment {
 
     private static final String TAG = MovieDetailFragment.class.getSimpleName();
@@ -82,6 +88,8 @@ public class MovieDetailFragment extends Fragment {
     private int mLightColor;
     private LinearLayout mTrailerContainer;
     private LinearLayout mReviewContainer;
+    private ActionBar mActionBar;
+    private String mListType;
 
     public MovieDetailFragment() {
         // Required empty public constructor
@@ -126,12 +134,26 @@ public class MovieDetailFragment extends Fragment {
         setHasOptionsMenu(true);
 
         mMovieId = getArguments().getInt("movieId", 1);
-        String listType = getArguments().getString("movieTable", QueryUtils.TOP_MOVIES_TAG);
+        mListType = getArguments().getString("movieTable", QueryUtils.TOP_MOVIES_TAG);
 
-        Log.d(TAG, "onCreate - listType value: " + listType);
+        Log.d(TAG, "onCreate - mListType value: " + mListType);
 
+        AppCompatActivity mActivity = (AppCompatActivity) getActivity();
+        mActionBar = mActivity.getSupportActionBar();
 
-        Movie selectedMovie = QueryUtils.queryMovieId(getContext(), mMovieId, listType);
+        switch (mListType) {
+            case TOP_MOVIES_TAG:
+                mActionBar.setTitle("Top Movies");
+                break;
+            case POP_MOVIES_TAG:
+                mActionBar.setTitle("Popular Movies");
+                break;
+            case FAV_MOVIES_TAG:
+                mActionBar.setTitle("Favorite Movies");
+                break;
+        }
+
+        Movie selectedMovie = QueryUtils.queryMovieId(getContext(), mMovieId, mListType);
 
         mMovieName = selectedMovie.getTitle();
         String preFixedReleaseDate = selectedMovie.getReleaseDate();
@@ -167,7 +189,7 @@ public class MovieDetailFragment extends Fragment {
 
                     ImageView playImage = (ImageView) currentTrailerView.findViewById(R.id.img_trailer_play);
                     playImage.setVisibility(View.GONE);
-                    currentTrailerName.setText("No trailers available.");
+                    currentTrailerName.setText(R.string.no_trailers_available);
                     mTrailerContainer.addView(currentTrailerView);
 
                 } else {

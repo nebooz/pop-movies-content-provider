@@ -11,4 +11,5 @@
     <string name="empty_movie_list">The Favorite Movies list is empty. Add Movies to your favorites using the menu option on the top right.</string>
     <string name="reviews">Reviews</string>
     <string name="review_author">"Author: "</string>
+    <string name="no_trailers_available">No trailers available.</string>
 </resources>
