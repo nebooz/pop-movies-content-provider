@@ -124,7 +124,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="106dp"
                 android:background="@drawable/poster_bg"
-                android:elevation="4dp"
+                android:elevation="6dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:src="@drawable/test_image" />
@@ -150,9 +150,9 @@
             <LinearLayout
                 android:id="@+id/trailer_list_container"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/txt_trailer_header"
@@ -179,13 +179,12 @@
             <LinearLayout
                 android:id="@+id/review_list_container"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txt_review_header"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintTop_toBottomOf="@+id/txt_review_header" />
 
             <ImageView
                 android:id="@+id/img_favorite_tag"

@@ -4,6 +4,8 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -51,6 +53,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.R.color.white;
 import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.FAV_MOVIES_TAG;
 import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.POP_MOVIES_TAG;
 import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.TOP_MOVIES_TAG;
@@ -378,8 +381,21 @@ public class MovieDetailFragment extends Fragment {
                                             getColor(getContext(), R.color.defaultDarkColor));
                                 }
 
-                                movieRatingTextView.setBackgroundColor(mDarkColor);
-                                movieRatingTextView.setShadowLayer(10, 0, 0, Color.BLACK);
+                                //Rating Score Drawable options
+                                GradientDrawable gradientRoundCorners = new GradientDrawable();
+                                int highlightColor = ContextCompat.getColor(getContext(), white);
+
+                                gradientRoundCorners.setColors(new int[]{mLightColor, mDarkColor});
+                                gradientRoundCorners.setAlpha(190);
+                                gradientRoundCorners.setStroke(3, mDarkColor);
+                                gradientRoundCorners.setCornerRadius(20f);
+
+                                movieRatingTextView.setBackground(gradientRoundCorners);
+                                movieRatingTextView.setTextColor(highlightColor);
+                                movieRatingTextView.setShadowLayer(20, 0, 0, Color.BLACK);
+
+                                //Changing the color of the ActionBar to match the dark movie color
+                                mActionBar.setBackgroundDrawable(new ColorDrawable(mDarkColor));
 
                                 movieTitleTextView.setBackgroundColor(mDarkColor);
                                 movieTitleTextView.setShadowLayer(10, 0, 0, Color.BLACK);
