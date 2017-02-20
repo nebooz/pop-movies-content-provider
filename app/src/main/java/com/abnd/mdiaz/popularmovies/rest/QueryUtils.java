@@ -128,10 +128,12 @@ public class QueryUtils {
     public static List<Movie> queryAllMovies(Context context, String movieTable) {
 
         Uri movieTableUri;
+        String sortOrder = null;
 
         switch (movieTable) {
             case TOP_MOVIES_TAG:
                 movieTableUri = DatabaseContract.topMovieEntry.CONTENT_URI;
+                sortOrder = DatabaseContract.topMovieEntry.COLUMN_VOTE_AVERAGE + " DESC";
                 break;
             case POP_MOVIES_TAG:
                 movieTableUri = DatabaseContract.popMovieEntry.CONTENT_URI;
@@ -149,7 +151,7 @@ public class QueryUtils {
                 null,
                 null,
                 null,
-                null);
+                sortOrder);
 
         List<Movie> movieList = new ArrayList<>();
 
@@ -258,8 +260,6 @@ public class QueryUtils {
                 break;
 
         }
-
-        //cursor.close();
 
         return new Movie(
                 movieTitle,
