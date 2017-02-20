@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
 import com.abnd.mdiaz.popularmovies.database.DatabaseHelper;
@@ -17,6 +18,9 @@ import com.abnd.mdiaz.popularmovies.database.DatabaseHelper;
  */
 
 public class MovieProvider extends ContentProvider {
+
+    private static final String TAG = MovieProvider.class.getSimpleName();
+
     // Use an int for each URI we will run, this represents the different queries
     private static final int TOP_MOVIE = 100;
     private static final int TOP_MOVIE_ID = 101;
@@ -24,6 +28,10 @@ public class MovieProvider extends ContentProvider {
     private static final int POP_MOVIE_ID = 201;
     private static final int FAV_MOVIE = 300;
     private static final int FAV_MOVIE_ID = 301;
+    private static final int MOVIE_REVIEW = 1000;
+    private static final int MOVIE_REVIEW_ID = 1001;
+    private static final int MOVIE_VIDEO = 2000;
+    private static final int MOVIE_VIDEO_ID = 2001;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private DatabaseHelper mOpenHelper;
@@ -43,6 +51,10 @@ public class MovieProvider extends ContentProvider {
         matcher.addURI(content, DatabaseContract.PATH_POP_MOVIES + "/#", POP_MOVIE_ID);
         matcher.addURI(content, DatabaseContract.PATH_FAV_MOVIES, FAV_MOVIE);
         matcher.addURI(content, DatabaseContract.PATH_FAV_MOVIES + "/#", FAV_MOVIE_ID);
+        matcher.addURI(content, DatabaseContract.PATH_MOVIE_REVIEWS, MOVIE_REVIEW);
+        matcher.addURI(content, DatabaseContract.PATH_MOVIE_REVIEWS + "/#", MOVIE_REVIEW_ID);
+        matcher.addURI(content, DatabaseContract.PATH_MOVIE_VIDEOS, MOVIE_VIDEO);
+        matcher.addURI(content, DatabaseContract.PATH_MOVIE_VIDEOS + "/#", MOVIE_VIDEO_ID);
 
         return matcher;
     }
@@ -82,6 +94,7 @@ public class MovieProvider extends ContentProvider {
                         null,
                         sortOrder
                 );
+                Log.d(TAG, "query: TOP_MOVIE_ID");
                 break;
             case POP_MOVIE:
                 retCursor = db.query(
@@ -105,6 +118,7 @@ public class MovieProvider extends ContentProvider {
                         null,
                         sortOrder
                 );
+                Log.d(TAG, "query: POP_MOVIE_ID");
                 break;
             case FAV_MOVIE:
                 retCursor = db.query(

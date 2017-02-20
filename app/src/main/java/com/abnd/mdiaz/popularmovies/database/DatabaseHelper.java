@@ -43,6 +43,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addTopMovieTable(db);
         addPopMovieTable(db);
         addFavMovieTable(db);
+        addMovieReviewTable(db);
+        addMovieVideoTable(db);
     }
 
     /**
@@ -60,6 +62,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + oldVersion + "]->[" + newVersion + "]");
         db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.topMovieEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.popMovieEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.movieReviewEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.movieVideoEntry.TABLE_NAME);
+
+        //Think I would need to handle what to do with the Favorites when this happens.
+
         onCreate(db);
     }
 
@@ -106,4 +113,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         DatabaseContract.favMovieEntry.COLUMN_OVERVIEW + " TEXT NOT NULL);"
         );
     }
+
+    private void addMovieReviewTable(SQLiteDatabase db) {
+        db.execSQL(
+                "CREATE TABLE " + DatabaseContract.movieReviewEntry.TABLE_NAME + " (" +
+                        DatabaseContract.movieReviewEntry.COLUMN_REVIEW_ID + " TEXT PRIMARY KEY, " +
+                        DatabaseContract.movieReviewEntry.COLUMN_MOVIEDB_ID + " INTEGER NOT NULL, " +
+                        DatabaseContract.movieReviewEntry.COLUMN_REVIEW_AUTHOR + " TEXT NOT NULL, " +
+                        DatabaseContract.movieReviewEntry.COLUMN_REVIEW_CONTENT + " TEXT NOT NULL, " +
+                        DatabaseContract.movieReviewEntry.COLUMN_REVIEW_URL + " TEXT NOT NULL);"
+        );
+    }
+
+    private void addMovieVideoTable(SQLiteDatabase db) {
+        db.execSQL(
+                "CREATE TABLE " + DatabaseContract.movieVideoEntry.TABLE_NAME + " (" +
+                        DatabaseContract.movieVideoEntry.COLUMN_VIDEO_ID + " TEXT PRIMARY KEY, " +
+                        DatabaseContract.movieVideoEntry.COLUMN_MOVIEDB_ID + " INTEGER NOT NULL, " +
+                        DatabaseContract.movieVideoEntry.COLUMN_VIDEO_ISO_639_1 + " TEXT NOT NULL, " +
+                        DatabaseContract.movieVideoEntry.COLUMN_VIDEO_ISO_3166_1 + " TEXT NOT NULL, " +
+                        DatabaseContract.movieVideoEntry.COLUMN_VIDEO_KEY + " TEXT NOT NULL, " +
+                        DatabaseContract.movieVideoEntry.COLUMN_VIDEO_NAME + " TEXT NOT NULL, " +
+                        DatabaseContract.movieVideoEntry.COLUMN_VIDEO_SITE + " TEXT NOT NULL, " +
+                        DatabaseContract.movieVideoEntry.COLUMN_VIDEO_SIZE + " INTEGER NOT NULL, " +
+                        DatabaseContract.movieVideoEntry.COLUMN_VIDEO_TYPE + " TEXT NOT NULL);"
+        );
+    }
+
 }

@@ -167,42 +167,29 @@ public class QueryUtils {
     }
 
     public static Movie queryMovieId(Context context, int movieDbId, String movieTable) {
-        // A "projection" defines the columns that will be returned for each row
-        // Contract class constant for the MOVIEDB_ID column name
 
-        String databaseColumn;
         Uri databaseUri;
 
         switch (movieTable) {
             case QueryUtils.TOP_MOVIES_TAG:
-                databaseColumn = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID;
-                databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
+                databaseUri = DatabaseContract.topMovieEntry.buildTopMovieUri(movieDbId);
                 break;
 
             case QueryUtils.POP_MOVIES_TAG:
-                databaseColumn = DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID;
-                databaseUri = DatabaseContract.popMovieEntry.CONTENT_URI;
+                databaseUri = DatabaseContract.popMovieEntry.buildPopMovieUri(movieDbId);
                 break;
 
             default:
-                databaseColumn = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID;
-                databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
-
+                databaseUri = DatabaseContract.topMovieEntry.buildTopMovieUri(movieDbId);
                 break;
         }
-
-        // Constructs a selection clause that matches the current Movie ID
-        String mSelectionClause = new StringBuilder().append(databaseColumn).append(" = ?").toString();
-
-        // Moves the current Movie ID to the selection arguments
-        String[] mSelectionArgs = {String.valueOf(movieDbId)};
 
         // Does a query against the table and returns a Cursor object
         Cursor cursor = context.getContentResolver().query(
                 databaseUri,
                 null,
-                mSelectionClause,
-                mSelectionArgs,
+                null,
+                null,
                 null);
 
         if ((cursor != null ? cursor.getCount() : 0) > 0) {

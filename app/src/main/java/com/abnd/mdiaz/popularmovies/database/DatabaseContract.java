@@ -18,6 +18,10 @@ public class DatabaseContract {
     public static final String PATH_TOP_MOVIES = "top_movies";
     public static final String PATH_POP_MOVIES = "pop_movies";
     public static final String PATH_FAV_MOVIES = "fav_movies";
+
+    public static final String PATH_MOVIE_REVIEWS = "movie_reviews";
+    public static final String PATH_MOVIE_VIDEOS = "movie_videos";
+
     /**
      * The content authority is used to create the base of all URIs which apps will use to
      * contact this content provider.
@@ -102,6 +106,61 @@ public class DatabaseContract {
 
         // Define a function to build a URI to find a specific movie by it's identifier
         public static Uri buildFavMovieUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+    }
+
+    public static final class movieReviewEntry implements BaseColumns {
+        // Content URI represents the base location for the table
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE_REVIEWS).build();
+
+        // These are special type prefixes that specify if a URI returns a list or a specific item
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/" + CONTENT_URI + "/" + PATH_MOVIE_REVIEWS;
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/" + CONTENT_URI + "/" + PATH_MOVIE_REVIEWS;
+
+        // Define the table schema
+        public static final String TABLE_NAME = "movieReviewTable";
+        public static final String COLUMN_MOVIEDB_ID = "movieDbId";
+        public static final String COLUMN_REVIEW_ID = "movieReviewId";
+        public static final String COLUMN_REVIEW_AUTHOR = "movieReviewAuthor";
+        public static final String COLUMN_REVIEW_CONTENT = "movieReviewContent";
+        public static final String COLUMN_REVIEW_URL = "movieReviewUrl";
+
+        // Define a function to build a URI to find a specific review by it's identifier
+        public static Uri buildMovieReviewUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+    }
+
+    public static final class movieVideoEntry implements BaseColumns {
+        // Content URI represents the base location for the table
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE_VIDEOS).build();
+
+        // These are special type prefixes that specify if a URI returns a list or a specific item
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/" + CONTENT_URI + "/" + PATH_MOVIE_VIDEOS;
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/" + CONTENT_URI + "/" + PATH_MOVIE_VIDEOS;
+
+        // Define the table schema
+        public static final String TABLE_NAME = "movieVideoTable";
+        public static final String COLUMN_MOVIEDB_ID = "movieDbId";
+        public static final String COLUMN_VIDEO_ID = "movieVideoId";
+        public static final String COLUMN_VIDEO_ISO_639_1 = "movieVideoIso6391";
+        public static final String COLUMN_VIDEO_ISO_3166_1 = "movieVideoIso31661";
+        public static final String COLUMN_VIDEO_KEY = "movieVideoKey";
+        public static final String COLUMN_VIDEO_NAME = "movieVideoName";
+        public static final String COLUMN_VIDEO_SITE = "movieVideoSite";
+        public static final String COLUMN_VIDEO_SIZE = "movieVideoSize";
+        public static final String COLUMN_VIDEO_TYPE = "movieVideoType";
+
+
+        // Define a function to build a URI to find a specific video by it's identifier
+        public static Uri buildMovieVideoUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
     }
