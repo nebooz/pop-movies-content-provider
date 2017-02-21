@@ -129,10 +129,6 @@ public class DatabaseContract {
         public static final String COLUMN_REVIEW_CONTENT = "movieReviewContent";
         public static final String COLUMN_REVIEW_URL = "movieReviewUrl";
 
-        // Define a function to build a URI to find a specific review by it's identifier
-        public static Uri buildMovieReviewUri(long id) {
-            return ContentUris.withAppendedId(CONTENT_URI, id);
-        }
     }
 
     public static final class movieVideoEntry implements BaseColumns {
