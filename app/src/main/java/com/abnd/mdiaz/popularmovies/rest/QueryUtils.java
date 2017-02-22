@@ -34,6 +34,7 @@ public class QueryUtils {
     private static final String MOVIEDB_BASE_URL = "https://api.themoviedb.org/3/movie/";
     private static final String MOVIEDB_TOP_MOVIES = "top_rated";
     private static final String MOVIEDB_POP_MOVIES = "popular";
+    private static final String MOVIEDB_REVIEWS = "reviews";
     private static final String MOVIEDB_API_KEY = "?api_key=";
 
     public static final String TOP_MOVIES_URL = new StringBuilder()
@@ -49,10 +50,20 @@ public class QueryUtils {
             .append(MOVIEDB_API_KEY)
             .append(SensitiveInfo.getMoviesApiKey())
             .toString();
-
     private static OkHttpClient client = new OkHttpClient();
 
     private QueryUtils() {
+    }
+
+    public static String movieReviewUrl(int movieDbId) {
+        return new StringBuilder()
+                .append(MOVIEDB_BASE_URL)
+                .append(String.valueOf(movieDbId))
+                .append("/")
+                .append(MOVIEDB_REVIEWS)
+                .append(MOVIEDB_API_KEY)
+                .append(SensitiveInfo.getMoviesApiKey())
+                .toString();
     }
 
     private static String httpRequest(String url) throws IOException {
@@ -77,7 +88,7 @@ public class QueryUtils {
         extractMovies(context, jsonResponse, movieTable);
     }
 
-    public static void fetchReviews(Context context, String url, String movieTable) {
+    public static void fetchReviews(Context context, String url) {
 
         // Perform HTTP request to the URL and receive a JSON response back
         String jsonResponse = null;
@@ -87,7 +98,7 @@ public class QueryUtils {
             Log.e(TAG, "Error closing input stream", e);
         }
 
-        extractMovies(context, jsonResponse, movieTable);
+        extractReviews(context, jsonResponse);
     }
 
     private static void extractMovies(Context context, String movieJson, String movieTable) {
@@ -135,7 +146,7 @@ public class QueryUtils {
 
     }
 
-    private static void extractReviews(Context context, String movieJson, String movieTable) {
+    private static void extractReviews(Context context, String movieJson) {
 
         try {
             //Whole thing
@@ -258,6 +269,36 @@ public class QueryUtils {
             return null;
         }
 
+    }
+
+    public static List<MovieReview> queryAllReviews(Context context, int movieDbId) {
+
+        Uri movieReviewTableUri = DatabaseContract.movieReviewEntry.CONTENT_URI;
+
+        String selectionClause = DatabaseContract.movieReviewEntry.COLUMN_MOVIEDB_ID + " = ?";
+
+        String[] selectionArgs = {String.valueOf(movieDbId)};
+
+        Cursor cursor = context.getContentResolver().query(
+                movieReviewTableUri,
+                null,
+                selectionClause,
+                selectionArgs,
+                null);
+
+        List<MovieReview> movieReviewList = new ArrayList<>();
+
+        assert cursor != null;
+
+        while (cursor.moveToNext()) {
+
+            movieReviewList.add(getReview(cursor));
+
+        }
+
+        cursor.close();
+
+        return movieReviewList;
     }
 
     @NonNull
@@ -570,5 +611,6 @@ public class QueryUtils {
         }
 
     }
+
 
 }

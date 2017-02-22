@@ -1,15 +1,14 @@
 package com.abnd.mdiaz.popularmovies.fragments;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.ColorUtils;
@@ -32,14 +31,8 @@ import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.R;
 import com.abnd.mdiaz.popularmovies.model.Movie;
-import com.abnd.mdiaz.popularmovies.model.Review;
-import com.abnd.mdiaz.popularmovies.model.ReviewsResponse;
-import com.abnd.mdiaz.popularmovies.model.Trailer;
-import com.abnd.mdiaz.popularmovies.model.TrailersResponse;
-import com.abnd.mdiaz.popularmovies.rest.ApiClient;
-import com.abnd.mdiaz.popularmovies.rest.ApiInterface;
+import com.abnd.mdiaz.popularmovies.model.MovieReview;
 import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
-import com.abnd.mdiaz.popularmovies.utils.SensitiveInfo;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Picasso;
 
@@ -47,11 +40,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-
-import io.realm.Realm;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import static android.R.color.white;
 import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.FAV_MOVIES_TAG;
@@ -84,12 +72,10 @@ public class MovieDetailFragment extends Fragment {
     private double mMovieRating;
     private String mMovieSynopsis;
     private String mMovieReleaseDate;
-    private Movie mMovie;
-    private Realm realm;
     private boolean isTablet;
     private int mDarkColor;
     private int mLightColor;
-    private LinearLayout mTrailerContainer;
+    private LinearLayout mMovieDetailExtrasContainer;
     private LinearLayout mReviewContainer;
     private ActionBar mActionBar;
     private String mListType;
@@ -139,6 +125,8 @@ public class MovieDetailFragment extends Fragment {
         mMovieId = getArguments().getInt("movieId", 1);
         mListType = getArguments().getString("movieTable", QueryUtils.TOP_MOVIES_TAG);
 
+        new addReviewsToDatabase().execute(QueryUtils.movieReviewUrl(mMovieId));
+
         Log.d(TAG, "onCreate - mListType value: " + mListType);
 
         AppCompatActivity mActivity = (AppCompatActivity) getActivity();
@@ -170,140 +158,6 @@ public class MovieDetailFragment extends Fragment {
 
     }
 
-    private void getTrailerList(int movieId) {
-
-        ApiInterface apiService =
-                ApiClient.getClient().create(ApiInterface.class);
-
-        Call<TrailersResponse> call = apiService.getMovieTrailers(movieId, SensitiveInfo.getMoviesApiKey());
-
-        call.enqueue(new Callback<TrailersResponse>() {
-            @Override
-            public void onResponse(Call<TrailersResponse> call, Response<TrailersResponse> response) {
-
-                List<Trailer> trailerList = response.body().getTrailers();
-
-                if (trailerList.size() == 0) {
-
-                    ConstraintLayout currentTrailerView = (ConstraintLayout) LayoutInflater.from(getContext())
-                            .inflate(R.layout.movie_detail_trailer_view, mTrailerContainer, false);
-
-                    TextView currentTrailerName = (TextView) currentTrailerView.findViewById(R.id.txt_trailer_element);
-
-                    ImageView playImage = (ImageView) currentTrailerView.findViewById(R.id.img_trailer_play);
-                    playImage.setVisibility(View.GONE);
-                    currentTrailerName.setText(R.string.no_trailers_available);
-                    mTrailerContainer.addView(currentTrailerView);
-
-                } else {
-
-                    for (final Trailer currentTrailer : trailerList) {
-
-                        ConstraintLayout currentTrailerView = (ConstraintLayout) LayoutInflater.from(getContext())
-                                .inflate(R.layout.movie_detail_trailer_view, mTrailerContainer, false);
-
-                        TextView currentTrailerName = (TextView) currentTrailerView.findViewById(R.id.txt_trailer_element);
-
-                        currentTrailerView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                try {
-                                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + currentTrailer.getKey()));
-                                    startActivity(intent);
-                                } catch (ActivityNotFoundException ex) {
-                                    Intent intent = new Intent(Intent.ACTION_VIEW,
-                                            Uri.parse("http://www.youtube.com/watch?v=" + currentTrailer.getKey()));
-                                    startActivity(intent);
-                                }
-                            }
-                        });
-
-                        currentTrailerName.setText(currentTrailer.getName());
-                        mTrailerContainer.addView(currentTrailerView);
-                    }
-
-                }
-
-                Log.d(TAG, "Number of trailers received: " + trailerList.size());
-            }
-
-            @Override
-            public void onFailure(Call<TrailersResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e(TAG, t.toString());
-            }
-        });
-
-    }
-
-    private void getReviewList(int movieId) {
-
-        ApiInterface apiService =
-                ApiClient.getClient().create(ApiInterface.class);
-
-        Call<ReviewsResponse> call = apiService.getMovieReviews(movieId, SensitiveInfo.getMoviesApiKey());
-
-        call.enqueue(new Callback<ReviewsResponse>() {
-            @Override
-            public void onResponse(Call<ReviewsResponse> call, Response<ReviewsResponse> response) {
-
-                List<Review> reviewList = response.body().getReviews();
-
-                if (reviewList.size() == 0) {
-
-                    ConstraintLayout currentReviewView = (ConstraintLayout) LayoutInflater.from(getContext())
-                            .inflate(R.layout.movie_detail_review_view, mReviewContainer, false);
-
-                    TextView currentReviewAuthor = (TextView) currentReviewView.findViewById(R.id.txt_review_author_element);
-
-                    View contentDivider = currentReviewView.findViewById(R.id.content_divider);
-                    contentDivider.setVisibility(View.GONE);
-
-                    TextView currentReviewContent = (TextView) currentReviewView.findViewById(R.id.txt_review_content_element);
-                    currentReviewContent.setVisibility(View.GONE);
-
-                    currentReviewAuthor.setText("No reviews available.");
-                    mReviewContainer.addView(currentReviewView);
-
-                } else {
-
-                    for (final Review currentReview : reviewList) {
-
-                        ConstraintLayout currentReviewView = (ConstraintLayout) LayoutInflater.from(getContext())
-                                .inflate(R.layout.movie_detail_review_view, mReviewContainer, false);
-
-                        TextView currentReviewAuthor = (TextView) currentReviewView.findViewById(R.id.txt_review_author_element);
-                        TextView currentReviewContent = (TextView) currentReviewView.findViewById(R.id.txt_review_content_element);
-
-                        currentReviewView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Intent intent = new Intent(Intent.ACTION_VIEW,
-                                        Uri.parse(currentReview.getUrl()));
-                                startActivity(intent);
-                            }
-                        });
-
-                        currentReviewAuthor.setText(String.format("%s%s", getString(R.string.review_author), currentReview.getAuthor()));
-
-                        currentReviewContent.setText(currentReview.getContent());
-                        mReviewContainer.addView(currentReviewView);
-                    }
-
-                }
-
-                Log.d(TAG, "Number of reviews received: " + reviewList.size());
-            }
-
-            @Override
-            public void onFailure(Call<ReviewsResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e(TAG, t.toString());
-            }
-        });
-
-    }
-
     @Override
     public void onStart() {
         super.onStart();
@@ -329,8 +183,12 @@ public class MovieDetailFragment extends Fragment {
         movieRatingTextView = (TextView) view.findViewById(R.id.txt_rating);
         movieReleaseDateTextView = (TextView) view.findViewById(R.id.txt_release_date);
         movieSynopsisTextView = (TextView) view.findViewById(R.id.txt_synopsis);
-        trailerHeader = (TextView) view.findViewById(R.id.txt_trailer_header);
-        reviewHeader = (TextView) view.findViewById(R.id.txt_review_header);
+
+        mMovieDetailExtrasContainer = (LinearLayout) view.findViewById(R.id.movie_detail_extras_container);
+
+
+        //trailerHeader = (TextView) view.findViewById(R.id.txt_trailer_header);
+        //reviewHeader = (TextView) view.findViewById(R.id.txt_review_header);
 
         //Assign values to views...
         movieTitleTextView.setText(mMovieName);
@@ -408,17 +266,17 @@ public class MovieDetailFragment extends Fragment {
                                 movieSynopsisTextView.setTextColor(alphaTextColor);
                                 movieSynopsisTextView.setShadowLayer(6, 0, 0, Color.BLACK);
 
-                                trailerHeader.setBackgroundColor(mDarkColor);
-                                reviewHeader.setBackgroundColor(mDarkColor);
+                                //trailerHeader.setBackgroundColor(mDarkColor);
+                                //reviewHeader.setBackgroundColor(mDarkColor);
 
                             }
                         })
         );
 
-        mTrailerContainer = (LinearLayout) view.findViewById(R.id.trailer_list_container);
+        //mTrailerContainer = (LinearLayout) view.findViewById(R.id.trailer_list_container);
         //getTrailerList(mMovieId);
 
-        mReviewContainer = (LinearLayout) view.findViewById(R.id.review_list_container);
+        //mReviewContainer = (LinearLayout) view.findViewById(R.id.review_list_container);
         //getReviewList(mMovieId);
 
         return view;
@@ -473,70 +331,91 @@ public class MovieDetailFragment extends Fragment {
 
         switch (itemId) {
             case R.id.menu_add_favs:
-                if (!isFavorite()) {
-
-                    realm.executeTransactionAsync(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-
-                            //realm.copyToRealm(mMovie);
-
-                        }
-                    }, new Realm.Transaction.OnSuccess() {
-                        @Override
-                        public void onSuccess() {
-
-                            Toast.makeText(getContext(), "Current movie added to Favorites!", Toast.LENGTH_SHORT).show();
-                            mFavoriteTag.setVisibility(View.VISIBLE);
-                            if (isTablet) {
-
-                                mCallback.onDatabaseUpdate();
-
-                            }
-                            getActivity().invalidateOptionsMenu();
-
-                        }
-                    });
-
-                    return true;
-
-                } else {
-
-                    realm.executeTransactionAsync(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-
-                            //Movie currentMovie = realm.where(Movie.class).equalTo("movieId", mMovieId).findFirst();
-                            //currentMovie.deleteFromRealm();
-
-                        }
-                    }, new Realm.Transaction.OnSuccess() {
-                        @Override
-                        public void onSuccess() {
-
-                            Toast.makeText(getContext(), "Current movie was removed from Favorites!", Toast.LENGTH_SHORT).show();
-                            mFavoriteTag.setVisibility(View.GONE);
-                            if (isTablet) {
-
-                                mCallback.onDatabaseUpdate();
-
-                            }
-                            getActivity().invalidateOptionsMenu();
-
-                        }
-                    });
-
-                    return true;
-
-                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
 
     }
 
+    public boolean getReviewList(int movieDbId) {
+
+        List<MovieReview> reviewList = QueryUtils.queryAllReviews(getContext(), movieDbId);
+
+        Log.d(TAG, "getReviewList: reviewList Size: " + reviewList.size());
+
+        if (reviewList.size() == 0) {
+
+            TextView noReviewsTextView = (TextView) LayoutInflater.from(getContext())
+                    .inflate(R.layout.movie_detail_review_content_view, mMovieDetailExtrasContainer, false);
+
+            noReviewsTextView.setText("No reviews available.");
+
+            mMovieDetailExtrasContainer.addView(noReviewsTextView);
+
+            return false;
+
+        } else {
+
+            for (final MovieReview currentReview : reviewList) {
+
+                TextView currentReviewTextView = (TextView) LayoutInflater.from(getContext())
+                        .inflate(R.layout.movie_detail_review_content_view, mMovieDetailExtrasContainer, false);
+
+                currentReviewTextView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse(currentReview.getUrl()));
+                        startActivity(intent);
+                    }
+                });
+
+                currentReviewTextView.setText(currentReview.getContent());
+                mMovieDetailExtrasContainer.addView(currentReviewTextView);
+
+            }
+
+        }
+
+        return true;
+
+    }
+
     public interface OnDatabaseChangedListener {
         void onDatabaseUpdate();
     }
+
+    private class addReviewsToDatabase extends AsyncTask<String, Integer, Boolean> {
+        protected Boolean doInBackground(String... urls) {
+
+            int count = urls.length;
+            for (int i = 0; i < count; i++) {
+
+                QueryUtils.fetchReviews(getContext(), urls[i]);
+
+                publishProgress((int) ((i / (float) count) * 100));
+
+            }
+
+            return true;
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
+
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+            if (getReviewList(mMovieId)) {
+                Toast.makeText(getContext(), "Reviews Acquired Successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "No Reviews Available", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+
+    }
+
 
 }

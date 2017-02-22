@@ -44,7 +44,7 @@ public class MovieReview {
         this.mAuthor = author;
     }
 
-    public String getmContent() {
+    public String getContent() {
         return mContent;
     }
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/txt_review_author_element"
+    android:layout_width="match_parent"
+    android:layout_height="39dp"
+    android:background="#999E9E9E"
+    android:ellipsize="end"
+    android:gravity="center_vertical"
+    android:maxLines="1"
+    android:paddingBottom="4dp"
+    android:paddingEnd="16dp"
+    android:paddingStart="16dp"
+    android:paddingTop="4dp"
+    android:textColor="#000000"
+    android:textSize="14sp"
+    android:textStyle="bold"
+    tools:text="Author: Some Reviewer" />

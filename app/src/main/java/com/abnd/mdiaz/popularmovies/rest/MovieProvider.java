@@ -29,9 +29,7 @@ public class MovieProvider extends ContentProvider {
     private static final int FAV_MOVIE = 300;
     private static final int FAV_MOVIE_ID = 301;
     private static final int MOVIE_REVIEW = 1000;
-    private static final int MOVIE_REVIEW_ID = 1001;
     private static final int MOVIE_VIDEO = 2000;
-    private static final int MOVIE_VIDEO_ID = 2001;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private DatabaseHelper mOpenHelper;
@@ -52,9 +50,7 @@ public class MovieProvider extends ContentProvider {
         matcher.addURI(content, DatabaseContract.PATH_FAV_MOVIES, FAV_MOVIE);
         matcher.addURI(content, DatabaseContract.PATH_FAV_MOVIES + "/#", FAV_MOVIE_ID);
         matcher.addURI(content, DatabaseContract.PATH_MOVIE_REVIEWS, MOVIE_REVIEW);
-        matcher.addURI(content, DatabaseContract.PATH_MOVIE_REVIEWS + "/#", MOVIE_REVIEW_ID);
         matcher.addURI(content, DatabaseContract.PATH_MOVIE_VIDEOS, MOVIE_VIDEO);
-        matcher.addURI(content, DatabaseContract.PATH_MOVIE_VIDEOS + "/#", MOVIE_VIDEO_ID);
 
         return matcher;
     }
@@ -72,6 +68,17 @@ public class MovieProvider extends ContentProvider {
         Cursor retCursor;
         long _id;
         switch (sUriMatcher.match(uri)) {
+            case MOVIE_REVIEW:
+                retCursor = db.query(
+                        DatabaseContract.movieReviewEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
             case TOP_MOVIE:
                 retCursor = db.query(
                         DatabaseContract.topMovieEntry.TABLE_NAME,
@@ -159,6 +166,8 @@ public class MovieProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
+            case MOVIE_REVIEW:
+                return DatabaseContract.movieReviewEntry.CONTENT_TYPE;
             case TOP_MOVIE:
                 return DatabaseContract.topMovieEntry.CONTENT_TYPE;
             case TOP_MOVIE_ID:
@@ -185,6 +194,14 @@ public class MovieProvider extends ContentProvider {
         Uri returnUri;
 
         switch (sUriMatcher.match(uri)) {
+            case MOVIE_REVIEW:
+                _id = db.insert(DatabaseContract.movieReviewEntry.TABLE_NAME, null, values);
+                if (_id > 0) {
+                    returnUri = DatabaseContract.movieReviewEntry.buildMovieReviewUri(_id);
+                } else {
+                    throw new UnsupportedOperationException("Unable to insert rows into: " + uri);
+                }
+                break;
             case TOP_MOVIE:
                 _id = db.insert(DatabaseContract.topMovieEntry.TABLE_NAME, null, values);
                 if (_id > 0) {
@@ -225,6 +242,9 @@ public class MovieProvider extends ContentProvider {
         int rows; // Number of rows effected
 
         switch (sUriMatcher.match(uri)) {
+            case MOVIE_REVIEW:
+                rows = db.delete(DatabaseContract.movieReviewEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             case TOP_MOVIE:
                 rows = db.delete(DatabaseContract.topMovieEntry.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -252,6 +272,9 @@ public class MovieProvider extends ContentProvider {
         int rows;
 
         switch (sUriMatcher.match(uri)) {
+            case MOVIE_REVIEW:
+                rows = db.update(DatabaseContract.movieReviewEntry.TABLE_NAME, values, selection, selectionArgs);
+                break;
             case TOP_MOVIE:
                 rows = db.update(DatabaseContract.topMovieEntry.TABLE_NAME, values, selection, selectionArgs);
                 break;
