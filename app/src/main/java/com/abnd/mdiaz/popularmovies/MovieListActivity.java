@@ -1,3 +1,4 @@
+
 package com.abnd.mdiaz.popularmovies;
 
 import android.graphics.Bitmap;
@@ -15,7 +16,6 @@ import com.abnd.mdiaz.popularmovies.fragments.MovieListFragment;
 import com.abnd.mdiaz.popularmovies.model.Movie;
 import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
 import com.abnd.mdiaz.popularmovies.views.adapters.MovieViewHolder;
-
 
 public class MovieListActivity extends AppCompatActivity implements
         MovieViewHolder.OnMovieSelectedListener,
@@ -41,7 +41,6 @@ public class MovieListActivity extends AppCompatActivity implements
 
             activityBaseLayout = (LinearLayout) findViewById(R.id.movie_list_fragment_container);
 
-
         } else {
 
             activityBaseLayout = (LinearLayout) findViewById(R.id.large_base_layout);
@@ -60,7 +59,8 @@ public class MovieListActivity extends AppCompatActivity implements
     }
 
     private void determinePaneLayout() {
-        FrameLayout movieDetailFragmentContainer = (FrameLayout) findViewById(R.id.large_movie_detail_fragment_container);
+        FrameLayout movieDetailFragmentContainer = (FrameLayout) findViewById(
+                R.id.large_movie_detail_fragment_container);
         // If there is a second pane for details
         if (movieDetailFragmentContainer != null) {
             Log.d(TAG, "determinePaneLayout: App is running on a Tablet!");
@@ -79,11 +79,13 @@ public class MovieListActivity extends AppCompatActivity implements
 
         if (isTwoPane) {
 
-            MovieDetailFragment movieDetailFragment = MovieDetailFragment.newInstance(selectedMovie.getMovieId(), movieTable, isTwoPane);
+            MovieDetailFragment movieDetailFragment = MovieDetailFragment
+                    .newInstance(selectedMovie.getMovieId(), movieTable, isTwoPane);
 
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.large_movie_detail_fragment_container, movieDetailFragment, MOVIE_DETAIL_FRAGMENT_TAG)
+                    .replace(R.id.large_movie_detail_fragment_container, movieDetailFragment,
+                            MOVIE_DETAIL_FRAGMENT_TAG)
                     .commit();
         }
 
@@ -91,8 +93,8 @@ public class MovieListActivity extends AppCompatActivity implements
 
     @Override
     public void onDatabaseUpdate() {
-        MovieListFragment movieListFragment = (MovieListFragment)
-                getSupportFragmentManager().findFragmentById(R.id.movie_list_fragment);
+        MovieListFragment movieListFragment = (MovieListFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.movie_list_fragment);
 
         movieListFragment.getMovieList(QueryUtils.TOP_MOVIES_TAG);
     }

@@ -1,3 +1,4 @@
+
 package com.abnd.mdiaz.popularmovies.fragments;
 
 import android.content.Context;
@@ -84,7 +85,8 @@ public class MovieDetailFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static MovieDetailFragment newInstance(int movieId, String movieTable, boolean isTablet) {
+    public static MovieDetailFragment newInstance(int movieId, String movieTable,
+            boolean isTablet) {
 
         MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
         Bundle args = new Bundle();
@@ -153,7 +155,7 @@ public class MovieDetailFragment extends Fragment {
         mMovieBackdropPath = selectedMovie.getBackdropPath();
         mMovieSynopsis = selectedMovie.getOverview();
 
-        //Proper date
+        // Proper date
         mMovieReleaseDate = this.getString(R.string.release_date) + dateFormat(preFixedReleaseDate);
 
     }
@@ -167,10 +169,11 @@ public class MovieDetailFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
-        //Assign all views...
+        // Assign all views...
         movieDetailScrollView = (ScrollView) view.findViewById(R.id.movie_detail_scrollview);
         mMovieDetailProgressBar = (ProgressBar) view.findViewById(R.id.movie_detail_progress_bar);
 
@@ -184,19 +187,19 @@ public class MovieDetailFragment extends Fragment {
         movieReleaseDateTextView = (TextView) view.findViewById(R.id.txt_release_date);
         movieSynopsisTextView = (TextView) view.findViewById(R.id.txt_synopsis);
 
-        mMovieDetailExtrasContainer = (LinearLayout) view.findViewById(R.id.movie_detail_reviews_container);
-
+        mMovieDetailExtrasContainer = (LinearLayout) view
+                .findViewById(R.id.movie_detail_reviews_container);
 
         movieHeader = (TextView) view.findViewById(R.id.txt_videos_section_header);
         reviewHeader = (TextView) view.findViewById(R.id.txt_review_section_header);
 
-        //Assign values to views...
+        // Assign values to views...
         movieTitleTextView.setText(mMovieName);
         movieRatingTextView.setText(String.format("%.1f", mMovieRating));
         movieReleaseDateTextView.setText(mMovieReleaseDate);
         movieSynopsisTextView.setText(mMovieSynopsis);
 
-        //Add Fav tag if Movie is in the Fav List
+        // Add Fav tag if Movie is in the Fav List
         mFavoriteTag = (ImageView) view.findViewById(R.id.img_favorite_tag);
         if (isFavorite()) {
             mFavoriteTag.setVisibility(View.VISIBLE);
@@ -215,35 +218,37 @@ public class MovieDetailFragment extends Fragment {
                             public void onPaletteLoaded(Palette palette) {
 
                                 /*
-                                Apparently, there is a difference between just getting the Resource
-                                straight up or using the getColor method...
-                                */
+                                 * Apparently, there is a difference between just getting the
+                                 * Resource straight up or using the getColor method...
+                                 */
                                 int defaultDarkColor = ContextCompat.getColor(getContext(),
                                         R.color.defaultDarkColor);
                                 int defaultLightColor = ContextCompat.getColor(getContext(),
                                         R.color.defaultLightColor);
 
-                                mDarkColor = palette.getDarkMutedColor(ContextCompat.
-                                        getColor(getContext(), R.color.defaultDarkColor));
+                                mDarkColor = palette.getDarkMutedColor(ContextCompat
+                                        .getColor(getContext(), R.color.defaultDarkColor));
 
                                 if (mDarkColor == defaultDarkColor) {
-                                    mDarkColor = palette.getDarkVibrantColor(ContextCompat.
-                                            getColor(getContext(), R.color.defaultDarkColor));
+                                    mDarkColor = palette.getDarkVibrantColor(ContextCompat
+                                            .getColor(getContext(), R.color.defaultDarkColor));
                                 }
 
-                                mLightColor = palette.getLightMutedColor(ContextCompat.
-                                        getColor(getContext(), R.color.defaultLightColor));
+                                mLightColor = palette.getLightMutedColor(ContextCompat
+                                        .getColor(getContext(), R.color.defaultLightColor));
 
                                 if (mLightColor == defaultLightColor) {
-                                    mLightColor = palette.getLightVibrantColor(ContextCompat.
-                                            getColor(getContext(), R.color.defaultDarkColor));
+                                    mLightColor = palette.getLightVibrantColor(ContextCompat
+                                            .getColor(getContext(), R.color.defaultDarkColor));
                                 }
 
-                                //Rating Score Drawable options
+                                // Rating Score Drawable options
                                 GradientDrawable gradientRoundCorners = new GradientDrawable();
                                 int highlightColor = ContextCompat.getColor(getContext(), white);
 
-                                gradientRoundCorners.setColors(new int[]{mLightColor, mDarkColor});
+                                gradientRoundCorners.setColors(new int[] {
+                                        mLightColor, mDarkColor
+                                });
                                 gradientRoundCorners.setAlpha(190);
                                 gradientRoundCorners.setStroke(3, mDarkColor);
                                 gradientRoundCorners.setCornerRadius(20f);
@@ -252,7 +257,7 @@ public class MovieDetailFragment extends Fragment {
                                 movieRatingTextView.setTextColor(highlightColor);
                                 movieRatingTextView.setShadowLayer(20, 0, 0, Color.BLACK);
 
-                                //Changing the color of the ActionBar to match the dark movie color
+                                // Changing the color of the ActionBar to match the dark movie color
                                 mActionBar.setBackgroundDrawable(new ColorDrawable(mDarkColor));
 
                                 movieTitleTextView.setBackgroundColor(mDarkColor);
@@ -272,8 +277,7 @@ public class MovieDetailFragment extends Fragment {
                                 reviewHeader.setShadowLayer(10, 0, 0, Color.BLACK);
 
                             }
-                        })
-        );
+                        }));
 
         return view;
     }
@@ -343,7 +347,8 @@ public class MovieDetailFragment extends Fragment {
         if (reviewList.size() == 0) {
 
             TextView noReviewsTextView = (TextView) LayoutInflater.from(getContext())
-                    .inflate(R.layout.movie_detail_review_content_view, mMovieDetailExtrasContainer, false);
+                    .inflate(R.layout.movie_detail_review_content_view, mMovieDetailExtrasContainer,
+                            false);
 
             noReviewsTextView.setText("No reviews available.");
 
@@ -360,7 +365,8 @@ public class MovieDetailFragment extends Fragment {
                 if (reviewCounter < REVIEWS_LIMIT) {
 
                     TextView currentReviewTextView = (TextView) LayoutInflater.from(getContext())
-                            .inflate(R.layout.movie_detail_review_content_view, mMovieDetailExtrasContainer, false);
+                            .inflate(R.layout.movie_detail_review_content_view,
+                                    mMovieDetailExtrasContainer, false);
 
                     currentReviewTextView.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -412,14 +418,14 @@ public class MovieDetailFragment extends Fragment {
         protected void onPostExecute(Boolean result) {
 
             if (getReviewList(mMovieId)) {
-                //Toast.makeText(getContext(), "Reviews Acquired Successfully", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getContext(), "Reviews Acquired Successfully",
+                // Toast.LENGTH_SHORT).show();
             } else {
-                //Toast.makeText(getContext(), "No Reviews Available", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getContext(), "No Reviews Available", Toast.LENGTH_SHORT).show();
             }
 
         }
 
     }
-
 
 }

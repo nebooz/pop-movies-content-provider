@@ -1,3 +1,4 @@
+
 package com.abnd.mdiaz.popularmovies.model;
 
 /**

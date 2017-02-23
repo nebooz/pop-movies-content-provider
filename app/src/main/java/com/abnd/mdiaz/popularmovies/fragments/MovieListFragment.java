@@ -1,5 +1,5 @@
-package com.abnd.mdiaz.popularmovies.fragments;
 
+package com.abnd.mdiaz.popularmovies.fragments;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -79,15 +79,11 @@ public class MovieListFragment extends Fragment {
     }
 
     private boolean checkConnectivity() {
-        ConnectivityManager connectivityManager = (ConnectivityManager)
-                getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-        if (networkInfo != null && networkInfo.isConnected()) {
-            return true;
-        } else {
-            return false;
-        }
+        return networkInfo != null && networkInfo.isConnected();
 
     }
 
@@ -126,7 +122,7 @@ public class MovieListFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_movie_list, container, false);
@@ -174,7 +170,8 @@ public class MovieListFragment extends Fragment {
         switch (itemId) {
             case R.id.menu_top_movies:
                 if (Objects.equals(mListType, TOP_MOVIES_TAG)) {
-                    Toast.makeText(getContext(), "You are looking at the Top Movies list.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "You are looking at the Top Movies list.",
+                            Toast.LENGTH_SHORT).show();
                     break;
                 }
                 mListType = TOP_MOVIES_TAG;
@@ -187,7 +184,8 @@ public class MovieListFragment extends Fragment {
 
             case R.id.menu_pop_movies:
                 if (Objects.equals(mListType, POP_MOVIES_TAG)) {
-                    Toast.makeText(getContext(), "You are looking at the Popular Movies list.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "You are looking at the Popular Movies list.",
+                            Toast.LENGTH_SHORT).show();
                     break;
                 }
                 mListType = POP_MOVIES_TAG;
@@ -200,7 +198,8 @@ public class MovieListFragment extends Fragment {
 
             case R.id.menu_fav_movies:
                 if (Objects.equals(mListType, FAV_MOVIES_TAG)) {
-                    Toast.makeText(getContext(), "You are looking at the Favorite Movies list.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "You are looking at the Favorite Movies list.",
+                            Toast.LENGTH_SHORT).show();
                     break;
                 }
                 mListType = FAV_MOVIES_TAG;
@@ -221,7 +220,7 @@ public class MovieListFragment extends Fragment {
                 break;
         }
 
-        //getMovieList(mListType);
+        // getMovieList(mListType);
         return super.onOptionsItemSelected(item);
 
     }
@@ -287,7 +286,8 @@ public class MovieListFragment extends Fragment {
             getMovieList(mListType);
 
             if (result) {
-                Toast.makeText(getContext(), "Movies Acquired Successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Movies Acquired Successfully", Toast.LENGTH_SHORT)
+                        .show();
 
             }
 

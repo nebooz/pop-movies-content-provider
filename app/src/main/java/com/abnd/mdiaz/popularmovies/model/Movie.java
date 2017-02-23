@@ -1,3 +1,4 @@
+
 package com.abnd.mdiaz.popularmovies.model;
 
 /**
@@ -14,7 +15,8 @@ public class Movie {
     private String mOverview;
     private int mMovieId;
 
-    public Movie(String title, String releaseDate, float voteAverage, String posterPath, String backdropPath, String overview, int movieId) {
+    public Movie(String title, String releaseDate, float voteAverage, String posterPath,
+            String backdropPath, String overview, int movieId) {
         this.mTitle = title;
         this.mReleaseDate = releaseDate;
         this.mVoteAverage = voteAverage;

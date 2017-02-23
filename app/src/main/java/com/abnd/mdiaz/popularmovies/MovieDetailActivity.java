@@ -1,3 +1,4 @@
+
 package com.abnd.mdiaz.popularmovies;
 
 import android.graphics.Bitmap;
@@ -22,7 +23,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
 
-        FrameLayout activityBaseLayout = (FrameLayout) findViewById(R.id.movie_detail_fragment_container);
+        FrameLayout activityBaseLayout = (FrameLayout) findViewById(
+                R.id.movie_detail_fragment_container);
 
         Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.list_mini_dark);
         BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bmp);
@@ -34,15 +36,17 @@ public class MovieDetailActivity extends AppCompatActivity {
         boolean isTablet = getIntent().getBooleanExtra("is_tablet", false);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //getSupportActionBar().setTitle(selectedMovie.getTitle());
+        // getSupportActionBar().setTitle(selectedMovie.getTitle());
 
         if (savedInstanceState == null) {
 
-            movieDetailFragment = MovieDetailFragment.newInstance(selectedMovieId, movieTable, isTablet);
+            movieDetailFragment = MovieDetailFragment.newInstance(selectedMovieId, movieTable,
+                    isTablet);
 
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.movie_detail_fragment_container, movieDetailFragment, MOVIE_DETAIL_FRAGMENT_TAG)
+                    .replace(R.id.movie_detail_fragment_container, movieDetailFragment,
+                            MOVIE_DETAIL_FRAGMENT_TAG)
                     .commit();
 
         }
