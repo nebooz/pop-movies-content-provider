@@ -9,8 +9,8 @@
     android:paddingEnd="16dp"
     android:paddingStart="16dp"
     android:paddingTop="4dp"
-    android:text="@string/reviews"
     android:textColor="#FFFFFF"
     android:textSize="14sp"
     android:textStyle="bold"
-    tools:background="@color/defaultLightColor" />
+    tools:background="@color/defaultLightColor"
+    tools:text="@string/reviews" />

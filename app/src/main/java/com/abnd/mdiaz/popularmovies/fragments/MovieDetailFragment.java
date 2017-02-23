@@ -27,7 +27,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.R;
 import com.abnd.mdiaz.popularmovies.model.Movie;
@@ -53,6 +52,7 @@ public class MovieDetailFragment extends Fragment {
     private static final String SMALL_IMAGE_SIZE = "w92";
     private static final String MEDIUM_IMAGE_SIZE = "w185";
     private static final String LARGE_IMAGE_SIZE = "w500";
+    private static final int REVIEWS_LIMIT = 3;
     OnDatabaseChangedListener mCallback;
     private ImageView backdropImageView;
     private ImageView posterImageView;
@@ -61,7 +61,7 @@ public class MovieDetailFragment extends Fragment {
     private TextView movieRatingTextView;
     private TextView movieReleaseDateTextView;
     private TextView movieSynopsisTextView;
-    private TextView trailerHeader;
+    private TextView movieHeader;
     private TextView reviewHeader;
     private ScrollView movieDetailScrollView;
     private ProgressBar mMovieDetailProgressBar;
@@ -184,11 +184,11 @@ public class MovieDetailFragment extends Fragment {
         movieReleaseDateTextView = (TextView) view.findViewById(R.id.txt_release_date);
         movieSynopsisTextView = (TextView) view.findViewById(R.id.txt_synopsis);
 
-        mMovieDetailExtrasContainer = (LinearLayout) view.findViewById(R.id.movie_detail_extras_container);
+        mMovieDetailExtrasContainer = (LinearLayout) view.findViewById(R.id.movie_detail_reviews_container);
 
 
-        //trailerHeader = (TextView) view.findViewById(R.id.txt_trailer_header);
-        //reviewHeader = (TextView) view.findViewById(R.id.txt_review_header);
+        movieHeader = (TextView) view.findViewById(R.id.txt_videos_section_header);
+        reviewHeader = (TextView) view.findViewById(R.id.txt_review_section_header);
 
         //Assign values to views...
         movieTitleTextView.setText(mMovieName);
@@ -266,18 +266,14 @@ public class MovieDetailFragment extends Fragment {
                                 movieSynopsisTextView.setTextColor(alphaTextColor);
                                 movieSynopsisTextView.setShadowLayer(6, 0, 0, Color.BLACK);
 
-                                //trailerHeader.setBackgroundColor(mDarkColor);
-                                //reviewHeader.setBackgroundColor(mDarkColor);
+                                movieHeader.setBackgroundColor(mLightColor);
+                                movieHeader.setShadowLayer(10, 0, 0, Color.BLACK);
+                                reviewHeader.setBackgroundColor(mLightColor);
+                                reviewHeader.setShadowLayer(10, 0, 0, Color.BLACK);
 
                             }
                         })
         );
-
-        //mTrailerContainer = (LinearLayout) view.findViewById(R.id.trailer_list_container);
-        //getTrailerList(mMovieId);
-
-        //mReviewContainer = (LinearLayout) view.findViewById(R.id.review_list_container);
-        //getReviewList(mMovieId);
 
         return view;
     }
@@ -357,22 +353,30 @@ public class MovieDetailFragment extends Fragment {
 
         } else {
 
+            int reviewCounter = 0;
+
             for (final MovieReview currentReview : reviewList) {
 
-                TextView currentReviewTextView = (TextView) LayoutInflater.from(getContext())
-                        .inflate(R.layout.movie_detail_review_content_view, mMovieDetailExtrasContainer, false);
+                if (reviewCounter < REVIEWS_LIMIT) {
 
-                currentReviewTextView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW,
-                                Uri.parse(currentReview.getUrl()));
-                        startActivity(intent);
-                    }
-                });
+                    TextView currentReviewTextView = (TextView) LayoutInflater.from(getContext())
+                            .inflate(R.layout.movie_detail_review_content_view, mMovieDetailExtrasContainer, false);
 
-                currentReviewTextView.setText(currentReview.getContent());
-                mMovieDetailExtrasContainer.addView(currentReviewTextView);
+                    currentReviewTextView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW,
+                                    Uri.parse(currentReview.getUrl()));
+                            startActivity(intent);
+                        }
+                    });
+
+                    currentReviewTextView.setText(currentReview.getContent());
+                    mMovieDetailExtrasContainer.addView(currentReviewTextView);
+
+                }
+
+                reviewCounter++;
 
             }
 
@@ -408,9 +412,9 @@ public class MovieDetailFragment extends Fragment {
         protected void onPostExecute(Boolean result) {
 
             if (getReviewList(mMovieId)) {
-                Toast.makeText(getContext(), "Reviews Acquired Successfully", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), "Reviews Acquired Successfully", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(getContext(), "No Reviews Available", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), "No Reviews Available", Toast.LENGTH_SHORT).show();
             }
 
         }
