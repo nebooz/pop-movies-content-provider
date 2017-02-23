@@ -1,3 +1,4 @@
+
 package com.abnd.mdiaz.popularmovies.rest;
 
 import android.content.ContentProvider;
@@ -63,7 +64,8 @@ public class MovieProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+            String sortOrder) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor retCursor;
         long _id;
@@ -76,8 +78,7 @@ public class MovieProvider extends ContentProvider {
                         selectionArgs,
                         null,
                         null,
-                        sortOrder
-                );
+                        sortOrder);
                 break;
             case TOP_MOVIE:
                 retCursor = db.query(
@@ -87,8 +88,7 @@ public class MovieProvider extends ContentProvider {
                         selectionArgs,
                         null,
                         null,
-                        sortOrder
-                );
+                        sortOrder);
                 break;
             case TOP_MOVIE_ID:
                 _id = ContentUris.parseId(uri);
@@ -96,11 +96,12 @@ public class MovieProvider extends ContentProvider {
                         DatabaseContract.topMovieEntry.TABLE_NAME,
                         projection,
                         DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID + " = ?",
-                        new String[]{String.valueOf(_id)},
+                        new String[] {
+                                String.valueOf(_id)
+                        },
                         null,
                         null,
-                        sortOrder
-                );
+                        sortOrder);
                 Log.d(TAG, "query: TOP_MOVIE_ID");
                 break;
             case POP_MOVIE:
@@ -111,8 +112,7 @@ public class MovieProvider extends ContentProvider {
                         selectionArgs,
                         null,
                         null,
-                        sortOrder
-                );
+                        sortOrder);
                 break;
             case POP_MOVIE_ID:
                 _id = ContentUris.parseId(uri);
@@ -120,11 +120,12 @@ public class MovieProvider extends ContentProvider {
                         DatabaseContract.popMovieEntry.TABLE_NAME,
                         projection,
                         DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID + " = ?",
-                        new String[]{String.valueOf(_id)},
+                        new String[] {
+                                String.valueOf(_id)
+                        },
                         null,
                         null,
-                        sortOrder
-                );
+                        sortOrder);
                 Log.d(TAG, "query: POP_MOVIE_ID");
                 break;
             case FAV_MOVIE:
@@ -135,8 +136,7 @@ public class MovieProvider extends ContentProvider {
                         selectionArgs,
                         null,
                         null,
-                        sortOrder
-                );
+                        sortOrder);
                 break;
             case FAV_MOVIE_ID:
                 _id = ContentUris.parseId(uri);
@@ -144,11 +144,12 @@ public class MovieProvider extends ContentProvider {
                         DatabaseContract.favMovieEntry.TABLE_NAME,
                         projection,
                         DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID + " = ?",
-                        new String[]{String.valueOf(_id)},
+                        new String[] {
+                                String.valueOf(_id)
+                        },
                         null,
                         null,
-                        sortOrder
-                );
+                        sortOrder);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -243,16 +244,20 @@ public class MovieProvider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)) {
             case MOVIE_REVIEW:
-                rows = db.delete(DatabaseContract.movieReviewEntry.TABLE_NAME, selection, selectionArgs);
+                rows = db.delete(DatabaseContract.movieReviewEntry.TABLE_NAME, selection,
+                        selectionArgs);
                 break;
             case TOP_MOVIE:
-                rows = db.delete(DatabaseContract.topMovieEntry.TABLE_NAME, selection, selectionArgs);
+                rows = db.delete(DatabaseContract.topMovieEntry.TABLE_NAME, selection,
+                        selectionArgs);
                 break;
             case POP_MOVIE:
-                rows = db.delete(DatabaseContract.popMovieEntry.TABLE_NAME, selection, selectionArgs);
+                rows = db.delete(DatabaseContract.popMovieEntry.TABLE_NAME, selection,
+                        selectionArgs);
                 break;
             case FAV_MOVIE:
-                rows = db.delete(DatabaseContract.favMovieEntry.TABLE_NAME, selection, selectionArgs);
+                rows = db.delete(DatabaseContract.favMovieEntry.TABLE_NAME, selection,
+                        selectionArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -273,16 +278,20 @@ public class MovieProvider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)) {
             case MOVIE_REVIEW:
-                rows = db.update(DatabaseContract.movieReviewEntry.TABLE_NAME, values, selection, selectionArgs);
+                rows = db.update(DatabaseContract.movieReviewEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
                 break;
             case TOP_MOVIE:
-                rows = db.update(DatabaseContract.topMovieEntry.TABLE_NAME, values, selection, selectionArgs);
+                rows = db.update(DatabaseContract.topMovieEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
                 break;
             case POP_MOVIE:
-                rows = db.update(DatabaseContract.popMovieEntry.TABLE_NAME, values, selection, selectionArgs);
+                rows = db.update(DatabaseContract.popMovieEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
                 break;
             case FAV_MOVIE:
-                rows = db.update(DatabaseContract.favMovieEntry.TABLE_NAME, values, selection, selectionArgs);
+                rows = db.update(DatabaseContract.favMovieEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

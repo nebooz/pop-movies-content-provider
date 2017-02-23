@@ -1,3 +1,4 @@
+
 package com.abnd.mdiaz.popularmovies.utils;
 
 import android.content.Context;
@@ -20,14 +21,16 @@ public class MarginDecoration extends RecyclerView.ItemDecoration {
 
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent,
-                               RecyclerView.State state) {
+            RecyclerView.State state) {
 
         /*
-        This took way too much work to figure out... I mean, if anyone is using a GridLayoutManager...
-        is it really that hard to add a bool parameter to center elements in the spans?
-        */
+         * This took way too much work to figure out... I mean, if anyone is using a
+         * GridLayoutManager... is it really that hard to add a bool parameter to center elements in
+         * the spans?
+         */
 
-        int cardWidth = mContext.getResources().getDimensionPixelSize(R.dimen.movie_list_card_width);
+        int cardWidth = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.movie_list_card_width);
         int managerWidth = parent.getLayoutManager().getWidth();
         GridLayoutManager manager = (GridLayoutManager) parent.getLayoutManager();
         int managerSpans = manager.getSpanCount();

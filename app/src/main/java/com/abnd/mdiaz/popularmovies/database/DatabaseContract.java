@@ -1,3 +1,4 @@
+
 package com.abnd.mdiaz.popularmovies.database;
 
 import android.content.ContentUris;
@@ -23,8 +24,8 @@ public class DatabaseContract {
     public static final String PATH_MOVIE_VIDEOS = "movie_videos";
 
     /**
-     * The content authority is used to create the base of all URIs which apps will use to
-     * contact this content provider.
+     * The content authority is used to create the base of all URIs which apps will use to contact
+     * this content provider.
      */
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
@@ -35,14 +36,14 @@ public class DatabaseContract {
 
     public static final class topMovieEntry implements BaseColumns {
         // Content URI represents the base location for the table
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_TOP_MOVIES).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_TOP_MOVIES).build();
 
         // These are special type prefixes that specify if a URI returns a list or a specific item
-        public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/" + CONTENT_URI + "/" + PATH_TOP_MOVIES;
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/" + CONTENT_URI + "/" + PATH_TOP_MOVIES;
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" + CONTENT_URI + "/"
+                + PATH_TOP_MOVIES;
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" + CONTENT_URI
+                + "/" + PATH_TOP_MOVIES;
 
         // Define the table schema
         public static final String TABLE_NAME = "topMovieTable";
@@ -61,13 +62,13 @@ public class DatabaseContract {
     }
 
     public static final class popMovieEntry implements BaseColumns {
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_POP_MOVIES).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_POP_MOVIES).build();
 
-        public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/" + CONTENT_URI + "/" + PATH_POP_MOVIES;
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/" + CONTENT_URI + "/" + PATH_POP_MOVIES;
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" + CONTENT_URI + "/"
+                + PATH_POP_MOVIES;
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" + CONTENT_URI
+                + "/" + PATH_POP_MOVIES;
 
         // Define the table schema
         public static final String TABLE_NAME = "popMovieTable";
@@ -86,13 +87,13 @@ public class DatabaseContract {
     }
 
     public static final class favMovieEntry implements BaseColumns {
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_FAV_MOVIES).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_FAV_MOVIES).build();
 
-        public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/" + CONTENT_URI + "/" + PATH_FAV_MOVIES;
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/" + CONTENT_URI + "/" + PATH_FAV_MOVIES;
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" + CONTENT_URI + "/"
+                + PATH_FAV_MOVIES;
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" + CONTENT_URI
+                + "/" + PATH_FAV_MOVIES;
 
         // Define the table schema
         public static final String TABLE_NAME = "favMovieTable";
@@ -112,14 +113,14 @@ public class DatabaseContract {
 
     public static final class movieReviewEntry implements BaseColumns {
         // Content URI represents the base location for the table
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE_REVIEWS).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_MOVIE_REVIEWS).build();
 
         // These are special type prefixes that specify if a URI returns a list or a specific item
-        public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/" + CONTENT_URI + "/" + PATH_MOVIE_REVIEWS;
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/" + CONTENT_URI + "/" + PATH_MOVIE_REVIEWS;
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" + CONTENT_URI + "/"
+                + PATH_MOVIE_REVIEWS;
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" + CONTENT_URI
+                + "/" + PATH_MOVIE_REVIEWS;
 
         // Define the table schema
         public static final String TABLE_NAME = "movieReviewTable";
@@ -138,14 +139,14 @@ public class DatabaseContract {
 
     public static final class movieVideoEntry implements BaseColumns {
         // Content URI represents the base location for the table
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE_VIDEOS).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_MOVIE_VIDEOS).build();
 
         // These are special type prefixes that specify if a URI returns a list or a specific item
-        public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/" + CONTENT_URI + "/" + PATH_MOVIE_VIDEOS;
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/" + CONTENT_URI + "/" + PATH_MOVIE_VIDEOS;
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" + CONTENT_URI + "/"
+                + PATH_MOVIE_VIDEOS;
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" + CONTENT_URI
+                + "/" + PATH_MOVIE_VIDEOS;
 
         // Define the table schema
         public static final String TABLE_NAME = "movieVideoTable";
@@ -158,7 +159,6 @@ public class DatabaseContract {
         public static final String COLUMN_VIDEO_SITE = "movieVideoSite";
         public static final String COLUMN_VIDEO_SIZE = "movieVideoSize";
         public static final String COLUMN_VIDEO_TYPE = "movieVideoType";
-
 
         // Define a function to build a URI to find a specific video by it's identifier
         public static Uri buildMovieVideoUri(long id) {
