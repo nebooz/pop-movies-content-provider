@@ -12,4 +12,6 @@
     <string name="reviews">Reviews</string>
     <string name="review_author">"Author: "</string>
     <string name="no_trailers_available">No trailers available.</string>
+    <string name="no_reviews">No reviews available.</string>
+    <string name="no_videos">No videos available.</string>
 </resources>

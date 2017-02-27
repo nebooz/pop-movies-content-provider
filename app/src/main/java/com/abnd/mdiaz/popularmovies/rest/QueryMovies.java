@@ -11,7 +11,6 @@ import android.util.Log;
 
 import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
 import com.abnd.mdiaz.popularmovies.model.Movie;
-import com.abnd.mdiaz.popularmovies.model.MovieReview;
 import com.abnd.mdiaz.popularmovies.utils.SensitiveInfo;
 
 import org.json.JSONArray;
@@ -26,12 +25,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class QueryUtils {
+public class QueryMovies {
 
     public static final String TOP_MOVIES_TAG = "topMovies";
     public static final String POP_MOVIES_TAG = "popMovies";
     public static final String FAV_MOVIES_TAG = "favMovies";
-    private static final String TAG = QueryUtils.class.getSimpleName();
+    private static final String TAG = QueryMovies.class.getSimpleName();
     private static final String MOVIEDB_BASE_URL = "https://api.themoviedb.org/3/movie/";
     private static final String MOVIEDB_TOP_MOVIES = "top_rated";
     private static final String MOVIEDB_POP_MOVIES = "popular";
@@ -53,18 +52,7 @@ public class QueryUtils {
             .toString();
     private static OkHttpClient client = new OkHttpClient();
 
-    private QueryUtils() {
-    }
-
-    public static String movieReviewUrl(int movieDbId) {
-        return new StringBuilder()
-                .append(MOVIEDB_BASE_URL)
-                .append(String.valueOf(movieDbId))
-                .append("/")
-                .append(MOVIEDB_REVIEWS)
-                .append(MOVIEDB_API_KEY)
-                .append(SensitiveInfo.getMoviesApiKey())
-                .toString();
+    private QueryMovies() {
     }
 
     private static String httpRequest(String url) throws IOException {
@@ -89,18 +77,7 @@ public class QueryUtils {
         extractMovies(context, jsonResponse, movieTable);
     }
 
-    public static void fetchReviews(Context context, String url) {
 
-        // Perform HTTP request to the URL and receive a JSON response back
-        String jsonResponse = null;
-        try {
-            jsonResponse = httpRequest(url);
-        } catch (IOException e) {
-            Log.e(TAG, "Error closing input stream", e);
-        }
-
-        extractReviews(context, jsonResponse);
-    }
 
     private static void extractMovies(Context context, String movieJson, String movieTable) {
 
@@ -144,204 +121,9 @@ public class QueryUtils {
             // If an error is thrown when executing any of the above statements in the "try" block,
             // catch the exception here, so the app doesn't crash. Print a log message
             // with the message from the exception.
-            Log.e("QueryUtils", "Problem parsing the Movie JSON results", e);
+            Log.e("QueryMovies", "Problem parsing the Movie JSON results", e);
         }
 
-    }
-
-    private static void extractReviews(Context context, String movieJson) {
-
-        try {
-            // Whole thing
-            JSONObject main = new JSONObject(movieJson);
-
-            // Getting the Movie Id
-            int movieDbId = main.getInt("id");
-
-            // The review array
-            JSONArray results = main.getJSONArray("results");
-
-            for (int i = 0; i < results.length(); i++) {
-
-                // One 'review'
-                JSONObject reviewObject = results.getJSONObject(i);
-
-                String reviewId = reviewObject.getString("id");
-                String reviewAuthor = reviewObject.getString("author");
-                String reviewContent = reviewObject.getString("content");
-                String reviewUrl = reviewObject.getString("url");
-
-                MovieReview review = queryReviewId(context, reviewId);
-
-                if (review == null) {
-
-                    insertMovieReview(context, movieDbId, reviewId, reviewAuthor, reviewContent,
-                            reviewUrl);
-
-                } else {
-
-                    updateMovieReview(context, movieDbId, reviewId, reviewAuthor, reviewContent,
-                            reviewUrl);
-
-                }
-
-            }
-
-        } catch (JSONException e) {
-            // If an error is thrown when executing any of the above statements in the "try" block,
-            // catch the exception here, so the app doesn't crash. Print a log message
-            // with the message from the exception.
-            Log.e("QueryUtils", "Problem parsing the Movie JSON results", e);
-        }
-
-    }
-
-    private static void insertMovieReview(Context context, int movieDbId, String reviewId,
-            String author, String content, String url) {
-
-        // Defines an object to contain the new values to insert
-        ContentValues mNewValues = new ContentValues();
-
-        Uri databaseUri = DatabaseContract.movieReviewEntry.CONTENT_URI;
-        mNewValues.put(DatabaseContract.movieReviewEntry.COLUMN_MOVIEDB_ID, movieDbId);
-        mNewValues.put(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_ID, reviewId);
-        mNewValues.put(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_AUTHOR, author);
-        mNewValues.put(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_CONTENT, content);
-        mNewValues.put(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_URL, url);
-
-        context.getContentResolver().insert(databaseUri, mNewValues);
-
-        Log.d(TAG, String.format("insertMovieReview - MovieID: %d / ReviewID: %s", movieDbId,
-                reviewId));
-    }
-
-    private static void updateMovieReview(Context context, int movieDbId, String reviewId,
-            String author, String content, String url) {
-
-        ContentValues mUpdateValues = new ContentValues();
-
-        Uri databaseUri = DatabaseContract.movieReviewEntry.CONTENT_URI;
-        String databaseColumn = DatabaseContract.movieReviewEntry.COLUMN_REVIEW_ID;
-
-        mUpdateValues.put(DatabaseContract.movieReviewEntry.COLUMN_MOVIEDB_ID, movieDbId);
-        mUpdateValues.put(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_AUTHOR, author);
-        mUpdateValues.put(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_CONTENT, content);
-        mUpdateValues.put(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_URL, url);
-
-        String mSelectionClause = databaseColumn + " = ?";
-        String[] mSelectionArgs = {
-                String.valueOf(reviewId)
-        };
-
-        context.getContentResolver().update(
-                databaseUri,
-                mUpdateValues,
-                mSelectionClause,
-                mSelectionArgs);
-
-        Log.d(TAG, String.format("updateMovieReview - MovieID: %d / ReviewID: %s", movieDbId,
-                reviewId));
-    }
-
-    public static MovieReview queryReviewId(Context context, String reviewId) {
-
-        Uri databaseUri;
-        String databaseColumn;
-
-        databaseColumn = DatabaseContract.movieReviewEntry.COLUMN_REVIEW_ID;
-        databaseUri = DatabaseContract.movieReviewEntry.CONTENT_URI;
-
-        // Constructs a selection clause that matches the current Review ID
-        String selectionClause = new StringBuilder().append(databaseColumn).append(" = ?")
-                .toString();
-
-        // Moves the current Review ID to the selection arguments
-        String[] mSelectionArgs = {
-                String.valueOf(reviewId)
-        };
-
-        // Does a query against the table and returns a Cursor object
-        Cursor cursor = context.getContentResolver().query(
-                databaseUri,
-                null,
-                selectionClause,
-                mSelectionArgs,
-                null);
-
-        if ((cursor != null ? cursor.getCount() : 0) > 0) {
-
-            cursor.moveToFirst();
-            MovieReview review = getReview(cursor);
-            cursor.close();
-
-            return review;
-
-        } else {
-
-            cursor.close();
-            return null;
-        }
-
-    }
-
-    public static List<MovieReview> queryAllReviews(Context context, int movieDbId) {
-
-        Uri movieReviewTableUri = DatabaseContract.movieReviewEntry.CONTENT_URI;
-
-        String selectionClause = DatabaseContract.movieReviewEntry.COLUMN_MOVIEDB_ID + " = ?";
-
-        String[] selectionArgs = {
-                String.valueOf(movieDbId)
-        };
-
-        Cursor cursor = context.getContentResolver().query(
-                movieReviewTableUri,
-                null,
-                selectionClause,
-                selectionArgs,
-                null);
-
-        List<MovieReview> movieReviewList = new ArrayList<>();
-
-        assert cursor != null;
-
-        while (cursor.moveToNext()) {
-
-            movieReviewList.add(getReview(cursor));
-
-        }
-
-        cursor.close();
-
-        return movieReviewList;
-    }
-
-    @NonNull
-    private static MovieReview getReview(Cursor cursor) {
-
-        int movieId;
-        String reviewId;
-        String reviewAuthor;
-        String reviewContent;
-        String reviewUrl;
-
-        movieId = cursor
-                .getInt(cursor.getColumnIndex(DatabaseContract.movieReviewEntry.COLUMN_MOVIEDB_ID));
-        reviewId = cursor.getString(
-                cursor.getColumnIndex(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_ID));
-        reviewAuthor = cursor.getString(
-                cursor.getColumnIndex(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_AUTHOR));
-        reviewContent = cursor.getString(
-                cursor.getColumnIndex(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_CONTENT));
-        reviewUrl = cursor.getString(
-                cursor.getColumnIndex(DatabaseContract.movieReviewEntry.COLUMN_REVIEW_URL));
-
-        return new MovieReview(
-                movieId,
-                reviewId,
-                reviewAuthor,
-                reviewContent,
-                reviewUrl);
     }
 
     public static List<Movie> queryAllMovies(Context context, String movieTable) {
@@ -392,11 +174,11 @@ public class QueryUtils {
         Uri databaseUri;
 
         switch (movieTable) {
-            case QueryUtils.TOP_MOVIES_TAG:
+            case QueryMovies.TOP_MOVIES_TAG:
                 databaseUri = DatabaseContract.topMovieEntry.buildTopMovieUri(movieDbId);
                 break;
 
-            case QueryUtils.POP_MOVIES_TAG:
+            case QueryMovies.POP_MOVIES_TAG:
                 databaseUri = DatabaseContract.popMovieEntry.buildPopMovieUri(movieDbId);
                 break;
 
@@ -528,7 +310,7 @@ public class QueryUtils {
         Uri databaseUri;
 
         switch (movieTable) {
-            case QueryUtils.TOP_MOVIES_TAG:
+            case QueryMovies.TOP_MOVIES_TAG:
                 databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
                 mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_NAME, movieName);
                 mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_RELEASE_DATE,
@@ -542,7 +324,7 @@ public class QueryUtils {
                 mNewValues.put(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID, movieDbId);
                 break;
 
-            case QueryUtils.POP_MOVIES_TAG:
+            case QueryMovies.POP_MOVIES_TAG:
                 databaseUri = DatabaseContract.popMovieEntry.CONTENT_URI;
                 mNewValues.put(DatabaseContract.popMovieEntry.COLUMN_NAME, movieName);
                 mNewValues.put(DatabaseContract.popMovieEntry.COLUMN_RELEASE_DATE,
@@ -586,7 +368,7 @@ public class QueryUtils {
         String databaseColumn;
 
         switch (movieTable) {
-            case QueryUtils.TOP_MOVIES_TAG:
+            case QueryMovies.TOP_MOVIES_TAG:
                 databaseUri = DatabaseContract.topMovieEntry.CONTENT_URI;
                 databaseColumn = DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID;
                 mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_NAME, movieName);
@@ -602,7 +384,7 @@ public class QueryUtils {
                 // mUpdateValues.put(DatabaseContract.topMovieEntry.COLUMN_MOVIEDB_ID, movieDbId);
                 break;
 
-            case QueryUtils.POP_MOVIES_TAG:
+            case QueryMovies.POP_MOVIES_TAG:
                 databaseUri = DatabaseContract.popMovieEntry.CONTENT_URI;
                 databaseColumn = DatabaseContract.popMovieEntry.COLUMN_MOVIEDB_ID;
                 mUpdateValues.put(DatabaseContract.popMovieEntry.COLUMN_NAME, movieName);

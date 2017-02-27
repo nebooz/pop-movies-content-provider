@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 import com.abnd.mdiaz.popularmovies.R;
 import com.abnd.mdiaz.popularmovies.model.Movie;
-import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
+import com.abnd.mdiaz.popularmovies.rest.QueryMovies;
 import com.abnd.mdiaz.popularmovies.utils.MarginDecoration;
 import com.abnd.mdiaz.popularmovies.views.adapters.MovieAdapter;
 
@@ -32,9 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.FAV_MOVIES_TAG;
-import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.POP_MOVIES_TAG;
-import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.TOP_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.FAV_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.POP_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.TOP_MOVIES_TAG;
 
 public class MovieListFragment extends Fragment {
 
@@ -93,15 +93,15 @@ public class MovieListFragment extends Fragment {
 
         Log.d(TAG, "onCreate: MovieListFragment OnCreate!");
 
-        new PopulateDatabase().execute(QueryUtils.TOP_MOVIES_URL, QueryUtils.POP_MOVIES_URL);
+        new PopulateDatabase().execute(QueryMovies.TOP_MOVIES_URL, QueryMovies.POP_MOVIES_URL);
 
         if (validConnection) {
 
             if (savedInstanceState != null) {
-                mListType = savedInstanceState.getString("ListType", QueryUtils.POP_MOVIES_TAG);
+                mListType = savedInstanceState.getString("ListType", QueryMovies.POP_MOVIES_TAG);
                 Log.d(TAG, "List Type: " + mListType);
             } else {
-                mListType = QueryUtils.POP_MOVIES_TAG;
+                mListType = QueryMovies.POP_MOVIES_TAG;
             }
 
             AppCompatActivity mActivity = (AppCompatActivity) getActivity();
@@ -250,7 +250,7 @@ public class MovieListFragment extends Fragment {
 
     public void getMovieList(String listType) {
 
-        loadAdapter(QueryUtils.queryAllMovies(getContext(), listType));
+        loadAdapter(QueryMovies.queryAllMovies(getContext(), listType));
 
     }
 
@@ -262,13 +262,13 @@ public class MovieListFragment extends Fragment {
 
             for (int i = 0; i < count; i++) {
 
-                if (urls[i].equals(QueryUtils.TOP_MOVIES_URL)) {
-                    movieTable = QueryUtils.TOP_MOVIES_TAG;
+                if (urls[i].equals(QueryMovies.TOP_MOVIES_URL)) {
+                    movieTable = QueryMovies.TOP_MOVIES_TAG;
                 } else {
-                    movieTable = QueryUtils.POP_MOVIES_TAG;
+                    movieTable = QueryMovies.POP_MOVIES_TAG;
                 }
 
-                QueryUtils.fetchMovies(getContext(), urls[i], movieTable);
+                QueryMovies.fetchMovies(getContext(), urls[i], movieTable);
 
                 publishProgress((int) ((i / (float) count) * 100));
 

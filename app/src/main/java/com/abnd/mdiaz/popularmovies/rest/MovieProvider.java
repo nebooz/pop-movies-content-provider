@@ -80,6 +80,16 @@ public class MovieProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
+            case MOVIE_VIDEO:
+                retCursor = db.query(
+                        DatabaseContract.movieVideoEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
             case TOP_MOVIE:
                 retCursor = db.query(
                         DatabaseContract.topMovieEntry.TABLE_NAME,
@@ -169,6 +179,8 @@ public class MovieProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
             case MOVIE_REVIEW:
                 return DatabaseContract.movieReviewEntry.CONTENT_TYPE;
+            case MOVIE_VIDEO:
+                return DatabaseContract.movieVideoEntry.CONTENT_TYPE;
             case TOP_MOVIE:
                 return DatabaseContract.topMovieEntry.CONTENT_TYPE;
             case TOP_MOVIE_ID:
@@ -199,6 +211,14 @@ public class MovieProvider extends ContentProvider {
                 _id = db.insert(DatabaseContract.movieReviewEntry.TABLE_NAME, null, values);
                 if (_id > 0) {
                     returnUri = DatabaseContract.movieReviewEntry.buildMovieReviewUri(_id);
+                } else {
+                    throw new UnsupportedOperationException("Unable to insert rows into: " + uri);
+                }
+                break;
+            case MOVIE_VIDEO:
+                _id = db.insert(DatabaseContract.movieVideoEntry.TABLE_NAME, null, values);
+                if (_id > 0) {
+                    returnUri = DatabaseContract.movieVideoEntry.buildMovieVideoUri(_id);
                 } else {
                     throw new UnsupportedOperationException("Unable to insert rows into: " + uri);
                 }
@@ -247,6 +267,10 @@ public class MovieProvider extends ContentProvider {
                 rows = db.delete(DatabaseContract.movieReviewEntry.TABLE_NAME, selection,
                         selectionArgs);
                 break;
+            case MOVIE_VIDEO:
+                rows = db.delete(DatabaseContract.movieVideoEntry.TABLE_NAME, selection,
+                        selectionArgs);
+                break;
             case TOP_MOVIE:
                 rows = db.delete(DatabaseContract.topMovieEntry.TABLE_NAME, selection,
                         selectionArgs);
@@ -279,6 +303,10 @@ public class MovieProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
             case MOVIE_REVIEW:
                 rows = db.update(DatabaseContract.movieReviewEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
+                break;
+            case MOVIE_VIDEO:
+                rows = db.update(DatabaseContract.movieVideoEntry.TABLE_NAME, values, selection,
                         selectionArgs);
                 break;
             case TOP_MOVIE:

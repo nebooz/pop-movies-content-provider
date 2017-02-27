@@ -1,6 +1,7 @@
 
 package com.abnd.mdiaz.popularmovies.fragments;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -32,7 +33,10 @@ import android.widget.TextView;
 import com.abnd.mdiaz.popularmovies.R;
 import com.abnd.mdiaz.popularmovies.model.Movie;
 import com.abnd.mdiaz.popularmovies.model.MovieReview;
-import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
+import com.abnd.mdiaz.popularmovies.model.MovieVideo;
+import com.abnd.mdiaz.popularmovies.rest.QueryMovieReviews;
+import com.abnd.mdiaz.popularmovies.rest.QueryMovieVideos;
+import com.abnd.mdiaz.popularmovies.rest.QueryMovies;
 import com.github.florent37.picassopalette.PicassoPalette;
 import com.squareup.picasso.Picasso;
 
@@ -42,9 +46,9 @@ import java.util.Date;
 import java.util.List;
 
 import static android.R.color.white;
-import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.FAV_MOVIES_TAG;
-import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.POP_MOVIES_TAG;
-import static com.abnd.mdiaz.popularmovies.rest.QueryUtils.TOP_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.FAV_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.POP_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.TOP_MOVIES_TAG;
 
 public class MovieDetailFragment extends Fragment {
 
@@ -54,6 +58,7 @@ public class MovieDetailFragment extends Fragment {
     private static final String MEDIUM_IMAGE_SIZE = "w185";
     private static final String LARGE_IMAGE_SIZE = "w500";
     private static final int REVIEWS_LIMIT = 3;
+    private static final int VIDEOS_LIMIT = 3;
     OnDatabaseChangedListener mCallback;
     private ImageView backdropImageView;
     private ImageView posterImageView;
@@ -76,8 +81,8 @@ public class MovieDetailFragment extends Fragment {
     private boolean isTablet;
     private int mDarkColor;
     private int mLightColor;
-    private LinearLayout mMovieDetailExtrasContainer;
-    private LinearLayout mReviewContainer;
+    private LinearLayout mMovieDetailReviewsContainer;
+    private LinearLayout mMovieDetailVideosContainer;
     private ActionBar mActionBar;
     private String mListType;
 
@@ -125,9 +130,14 @@ public class MovieDetailFragment extends Fragment {
         setHasOptionsMenu(true);
 
         mMovieId = getArguments().getInt("movieId", 1);
-        mListType = getArguments().getString("movieTable", QueryUtils.TOP_MOVIES_TAG);
+        mListType = getArguments().getString("movieTable", QueryMovies.TOP_MOVIES_TAG);
 
-        new addReviewsToDatabase().execute(QueryUtils.movieReviewUrl(mMovieId));
+        String[] queryUrls = {
+                QueryMovieReviews.movieReviewUrl(mMovieId),
+                QueryMovieVideos.movieVideoUrl(mMovieId)
+        };
+
+        new addExtrasToDb().execute(queryUrls);
 
         Log.d(TAG, "onCreate - mListType value: " + mListType);
 
@@ -146,7 +156,7 @@ public class MovieDetailFragment extends Fragment {
                 break;
         }
 
-        Movie selectedMovie = QueryUtils.queryMovieId(getContext(), mMovieId, mListType);
+        Movie selectedMovie = QueryMovies.queryMovieId(getContext(), mMovieId, mListType);
 
         mMovieName = selectedMovie.getTitle();
         String preFixedReleaseDate = selectedMovie.getReleaseDate();
@@ -187,8 +197,11 @@ public class MovieDetailFragment extends Fragment {
         movieReleaseDateTextView = (TextView) view.findViewById(R.id.txt_release_date);
         movieSynopsisTextView = (TextView) view.findViewById(R.id.txt_synopsis);
 
-        mMovieDetailExtrasContainer = (LinearLayout) view
+        mMovieDetailReviewsContainer = (LinearLayout) view
                 .findViewById(R.id.movie_detail_reviews_container);
+
+        mMovieDetailVideosContainer = (LinearLayout) view
+                .findViewById(R.id.movie_detail_videos_container);
 
         movieHeader = (TextView) view.findViewById(R.id.txt_videos_section_header);
         reviewHeader = (TextView) view.findViewById(R.id.txt_review_section_header);
@@ -272,9 +285,9 @@ public class MovieDetailFragment extends Fragment {
                                 movieSynopsisTextView.setShadowLayer(6, 0, 0, Color.BLACK);
 
                                 movieHeader.setBackgroundColor(mLightColor);
-                                movieHeader.setShadowLayer(10, 0, 0, Color.BLACK);
+                                //movieHeader.setShadowLayer(10, 0, 0, Color.BLACK);
                                 reviewHeader.setBackgroundColor(mLightColor);
-                                reviewHeader.setShadowLayer(10, 0, 0, Color.BLACK);
+                                //reviewHeader.setShadowLayer(10, 0, 0, Color.BLACK);
 
                             }
                         }));
@@ -301,7 +314,7 @@ public class MovieDetailFragment extends Fragment {
 
     public boolean isFavorite() {
 
-        return QueryUtils.isFavorite(getContext(), mMovieId);
+        return QueryMovies.isFavorite(getContext(), mMovieId);
 
     }
 
@@ -340,19 +353,26 @@ public class MovieDetailFragment extends Fragment {
 
     public boolean getReviewList(int movieDbId) {
 
-        List<MovieReview> reviewList = QueryUtils.queryAllReviews(getContext(), movieDbId);
+        List<MovieReview> reviewList = QueryMovieReviews.queryAllReviews(getContext(), movieDbId);
 
         Log.d(TAG, "getReviewList: reviewList Size: " + reviewList.size());
 
         if (reviewList.size() == 0) {
 
             TextView noReviewsTextView = (TextView) LayoutInflater.from(getContext())
-                    .inflate(R.layout.movie_detail_review_content_view, mMovieDetailExtrasContainer,
+                    .inflate(R.layout.movie_detail_review_content_view,
+                            mMovieDetailReviewsContainer,
                             false);
 
-            noReviewsTextView.setText("No reviews available.");
+            View extrasSeparator = LayoutInflater.from(getContext())
+                    .inflate(R.layout.extras_separator,
+                            mMovieDetailReviewsContainer,
+                            false);
 
-            mMovieDetailExtrasContainer.addView(noReviewsTextView);
+            noReviewsTextView.setText(R.string.no_reviews);
+
+            mMovieDetailReviewsContainer.addView(noReviewsTextView);
+            mMovieDetailReviewsContainer.addView(extrasSeparator);
 
             return false;
 
@@ -366,7 +386,7 @@ public class MovieDetailFragment extends Fragment {
 
                     TextView currentReviewTextView = (TextView) LayoutInflater.from(getContext())
                             .inflate(R.layout.movie_detail_review_content_view,
-                                    mMovieDetailExtrasContainer, false);
+                                    mMovieDetailReviewsContainer, false);
 
                     currentReviewTextView.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -377,8 +397,14 @@ public class MovieDetailFragment extends Fragment {
                         }
                     });
 
+                    View extrasSeparator = LayoutInflater.from(getContext())
+                            .inflate(R.layout.extras_separator,
+                                    mMovieDetailReviewsContainer,
+                                    false);
+
                     currentReviewTextView.setText(currentReview.getContent());
-                    mMovieDetailExtrasContainer.addView(currentReviewTextView);
+                    mMovieDetailReviewsContainer.addView(currentReviewTextView);
+                    mMovieDetailReviewsContainer.addView(extrasSeparator);
 
                 }
 
@@ -392,21 +418,98 @@ public class MovieDetailFragment extends Fragment {
 
     }
 
+    public boolean getVideoList(int movieDbId) {
+
+        List<MovieVideo> movieList = QueryMovieVideos.queryAllVideos(getContext(), movieDbId);
+
+        Log.d(TAG, "getReviewList: reviewList Size: " + movieList.size());
+
+        if (movieList.size() == 0) {
+
+            LinearLayout noVideosLayout = (LinearLayout) LayoutInflater.from(getContext())
+                    .inflate(R.layout.movie_detail_video_comp_view, mMovieDetailVideosContainer,
+                            false);
+
+            TextView movieNameTextView = (TextView) noVideosLayout
+                    .findViewById(R.id.txt_video_name);
+
+            ImageView playImageView = (ImageView) noVideosLayout.findViewById(R.id.img_play);
+
+            View extrasSeparator = LayoutInflater.from(getContext())
+                    .inflate(R.layout.extras_separator,
+                            mMovieDetailReviewsContainer,
+                            false);
+
+            movieNameTextView.setText(R.string.no_videos);
+            playImageView.setVisibility(View.GONE);
+
+            mMovieDetailVideosContainer.addView(noVideosLayout);
+            mMovieDetailVideosContainer.addView(extrasSeparator);
+
+            return false;
+
+        } else {
+
+            int movieCounter = 0;
+
+            for (final MovieVideo currentVideo : movieList) {
+
+                if (movieCounter < VIDEOS_LIMIT) {
+
+                    LinearLayout videoLayout = (LinearLayout) LayoutInflater.from(getContext())
+                            .inflate(R.layout.movie_detail_video_comp_view,
+                                    mMovieDetailVideosContainer,
+                                    false);
+
+                    TextView movieNameTextView = (TextView) videoLayout
+                            .findViewById(R.id.txt_video_name);
+
+                    videoLayout.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                Intent intent = new Intent(Intent.ACTION_VIEW,
+                                        Uri.parse("vnd.youtube:" + currentVideo.getKey()));
+                                startActivity(intent);
+                            } catch (ActivityNotFoundException ex) {
+                                Intent intent = new Intent(Intent.ACTION_VIEW,
+                                        Uri.parse("http://www.youtube.com/watch?v="
+                                                + currentVideo.getKey()));
+                                startActivity(intent);
+                            }
+                        }
+                    });
+
+                    View extrasSeparator = LayoutInflater.from(getContext())
+                            .inflate(R.layout.extras_separator,
+                                    mMovieDetailReviewsContainer,
+                                    false);
+
+                    movieNameTextView.setText(currentVideo.getName());
+                    mMovieDetailVideosContainer.addView(videoLayout);
+                    mMovieDetailVideosContainer.addView(extrasSeparator);
+
+                }
+
+                movieCounter++;
+
+            }
+
+        }
+
+        return true;
+
+    }
+
     public interface OnDatabaseChangedListener {
         void onDatabaseUpdate();
     }
 
-    private class addReviewsToDatabase extends AsyncTask<String, Integer, Boolean> {
+    private class addExtrasToDb extends AsyncTask<String, Integer, Boolean> {
         protected Boolean doInBackground(String... urls) {
 
-            int count = urls.length;
-            for (int i = 0; i < count; i++) {
-
-                QueryUtils.fetchReviews(getContext(), urls[i]);
-
-                publishProgress((int) ((i / (float) count) * 100));
-
-            }
+            QueryMovieReviews.fetchReviews(getContext(), urls[0]);
+            QueryMovieVideos.fetchMovies(getContext(), urls[1]);
 
             return true;
         }
@@ -417,12 +520,8 @@ public class MovieDetailFragment extends Fragment {
 
         protected void onPostExecute(Boolean result) {
 
-            if (getReviewList(mMovieId)) {
-                // Toast.makeText(getContext(), "Reviews Acquired Successfully",
-                // Toast.LENGTH_SHORT).show();
-            } else {
-                // Toast.makeText(getContext(), "No Reviews Available", Toast.LENGTH_SHORT).show();
-            }
+            getReviewList(mMovieId);
+            getVideoList(mMovieId);
 
         }
 

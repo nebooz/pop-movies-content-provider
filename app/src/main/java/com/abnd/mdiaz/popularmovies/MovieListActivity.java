@@ -14,7 +14,7 @@ import android.widget.LinearLayout;
 import com.abnd.mdiaz.popularmovies.fragments.MovieDetailFragment;
 import com.abnd.mdiaz.popularmovies.fragments.MovieListFragment;
 import com.abnd.mdiaz.popularmovies.model.Movie;
-import com.abnd.mdiaz.popularmovies.rest.QueryUtils;
+import com.abnd.mdiaz.popularmovies.rest.QueryMovies;
 import com.abnd.mdiaz.popularmovies.views.adapters.MovieViewHolder;
 
 public class MovieListActivity extends AppCompatActivity implements
@@ -96,7 +96,7 @@ public class MovieListActivity extends AppCompatActivity implements
         MovieListFragment movieListFragment = (MovieListFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.movie_list_fragment);
 
-        movieListFragment.getMovieList(QueryUtils.TOP_MOVIES_TAG);
+        movieListFragment.getMovieList(QueryMovies.TOP_MOVIES_TAG);
     }
 
 }
