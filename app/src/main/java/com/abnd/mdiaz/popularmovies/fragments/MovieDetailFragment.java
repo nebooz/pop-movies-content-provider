@@ -1,6 +1,12 @@
 
 package com.abnd.mdiaz.popularmovies.fragments;
 
+import static android.R.color.white;
+
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.FAV_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.POP_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.TOP_MOVIES_TAG;
+
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -45,11 +51,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import static android.R.color.white;
-import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.FAV_MOVIES_TAG;
-import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.POP_MOVIES_TAG;
-import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.TOP_MOVIES_TAG;
-
 public class MovieDetailFragment extends Fragment {
 
     private static final String TAG = MovieDetailFragment.class.getSimpleName();
@@ -85,6 +86,8 @@ public class MovieDetailFragment extends Fragment {
     private LinearLayout mMovieDetailVideosContainer;
     private ActionBar mActionBar;
     private String mListType;
+    private Movie currentMovie;
+    private Boolean favoriteStatus;
 
     public MovieDetailFragment() {
         // Required empty public constructor
@@ -132,6 +135,8 @@ public class MovieDetailFragment extends Fragment {
         mMovieId = getArguments().getInt("movieId", 1);
         mListType = getArguments().getString("movieTable", QueryMovies.TOP_MOVIES_TAG);
 
+        favoriteStatus = isFavorite();
+
         String[] queryUrls = {
                 QueryMovieReviews.movieReviewUrl(mMovieId),
                 QueryMovieVideos.movieVideoUrl(mMovieId)
@@ -156,14 +161,14 @@ public class MovieDetailFragment extends Fragment {
                 break;
         }
 
-        Movie selectedMovie = QueryMovies.queryMovieId(getContext(), mMovieId, mListType);
+        currentMovie = QueryMovies.queryMovieId(getContext(), mMovieId, mListType);
 
-        mMovieName = selectedMovie.getTitle();
-        String preFixedReleaseDate = selectedMovie.getReleaseDate();
-        mMovieRating = selectedMovie.getVoteAverage();
-        mMoviePosterPath = selectedMovie.getPosterPath();
-        mMovieBackdropPath = selectedMovie.getBackdropPath();
-        mMovieSynopsis = selectedMovie.getOverview();
+        mMovieName = currentMovie.getTitle();
+        String preFixedReleaseDate = currentMovie.getReleaseDate();
+        mMovieRating = currentMovie.getVoteAverage();
+        mMoviePosterPath = currentMovie.getPosterPath();
+        mMovieBackdropPath = currentMovie.getBackdropPath();
+        mMovieSynopsis = currentMovie.getOverview();
 
         // Proper date
         mMovieReleaseDate = this.getString(R.string.release_date) + dateFormat(preFixedReleaseDate);
@@ -285,9 +290,9 @@ public class MovieDetailFragment extends Fragment {
                                 movieSynopsisTextView.setShadowLayer(6, 0, 0, Color.BLACK);
 
                                 movieHeader.setBackgroundColor(mLightColor);
-                                //movieHeader.setShadowLayer(10, 0, 0, Color.BLACK);
+                                // movieHeader.setShadowLayer(10, 0, 0, Color.BLACK);
                                 reviewHeader.setBackgroundColor(mLightColor);
-                                //reviewHeader.setShadowLayer(10, 0, 0, Color.BLACK);
+                                // reviewHeader.setShadowLayer(10, 0, 0, Color.BLACK);
 
                             }
                         }));
@@ -306,8 +311,31 @@ public class MovieDetailFragment extends Fragment {
 
         MenuItem addToFavorites = menu.findItem(R.id.menu_add_favs);
 
-        if (isFavorite()) {
+        if (favoriteStatus) {
             addToFavorites.setTitle("Remove from Favorites");
+        }
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int itemId = item.getItemId();
+
+        switch (itemId) {
+            case R.id.menu_add_favs:
+                if (favoriteStatus) {
+                    QueryMovies.removeFromFavorites(getContext(), mMovieId);
+                    mFavoriteTag.setVisibility(View.INVISIBLE);
+                    favoriteStatus = false;
+                } else {
+                    QueryMovies.addToFavorites(getContext(), currentMovie);
+                    mFavoriteTag.setVisibility(View.VISIBLE);
+                    favoriteStatus = true;
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
     }
@@ -333,20 +361,6 @@ public class MovieDetailFragment extends Fragment {
                         + " must implement OnDatabaseChangedListener");
             }
 
-        }
-
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        int itemId = item.getItemId();
-
-        switch (itemId) {
-            case R.id.menu_add_favs:
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
         }
 
     }

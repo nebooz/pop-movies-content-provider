@@ -1,6 +1,10 @@
 
 package com.abnd.mdiaz.popularmovies.fragments;
 
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.FAV_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.POP_MOVIES_TAG;
+import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.TOP_MOVIES_TAG;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -32,22 +36,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.FAV_MOVIES_TAG;
-import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.POP_MOVIES_TAG;
-import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.TOP_MOVIES_TAG;
-
 public class MovieListFragment extends Fragment {
 
     private static final String TAG = MovieListFragment.class.getSimpleName();
-
-    private static final String INTER_FRAGMENT_TAG = "InterFragment";
 
     private RecyclerView mRecyclerView;
     private MovieAdapter mAdapter;
     private ProgressBar mProgressBar;
     private String mListType;
     private ActionBar mActionBar;
-    private TextView mEmptyFavsMessage;
 
     private boolean validConnection;
 
@@ -135,9 +132,6 @@ public class MovieListFragment extends Fragment {
         } else {
 
             mProgressBar = (ProgressBar) view.findViewById(R.id.movie_list_progress_bar);
-
-            mEmptyFavsMessage = (TextView) view.findViewById(R.id.txt_no_favs);
-
             mRecyclerView = (RecyclerView) view.findViewById(R.id.main_recycler_view);
 
             MarginDecoration marginDecoration = new MarginDecoration(getContext());

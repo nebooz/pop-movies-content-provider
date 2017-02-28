@@ -77,8 +77,6 @@ public class QueryMovies {
         extractMovies(context, jsonResponse, movieTable);
     }
 
-
-
     private static void extractMovies(Context context, String movieJson, String movieTable) {
 
         try {
@@ -180,6 +178,10 @@ public class QueryMovies {
 
             case QueryMovies.POP_MOVIES_TAG:
                 databaseUri = DatabaseContract.popMovieEntry.buildPopMovieUri(movieDbId);
+                break;
+
+            case QueryMovies.FAV_MOVIES_TAG:
+                databaseUri = DatabaseContract.favMovieEntry.buildFavMovieUri(movieDbId);
                 break;
 
             default:
@@ -464,6 +466,8 @@ public class QueryMovies {
 
         } else {
 
+            Log.d(TAG, "isFavorite: Movie is Here!");
+
             // Movie in Favorites
             cursor.close();
             return true;
@@ -472,4 +476,52 @@ public class QueryMovies {
 
     }
 
+    public static Boolean removeFromFavorites(Context context, int movieId) {
+
+        Uri databaseUri = DatabaseContract.favMovieEntry.CONTENT_URI;
+
+        String mSelectionClause = DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
+
+        String[] mSelectionArgs = {
+                String.valueOf(movieId)
+        };
+
+        context.getContentResolver().delete(
+                databaseUri,
+                mSelectionClause,
+                mSelectionArgs);
+
+        return null;
+    }
+
+    public static Boolean addToFavorites(Context context, Movie currentMovie) {
+
+        // Defines an object to contain the new values to insert
+        ContentValues mNewValues = new ContentValues();
+
+        Uri databaseUri = DatabaseContract.favMovieEntry.CONTENT_URI;
+
+        mNewValues.put(DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID, currentMovie.getMovieId());
+        mNewValues.put(DatabaseContract.favMovieEntry.COLUMN_NAME, currentMovie.getTitle());
+        mNewValues.put(DatabaseContract.favMovieEntry.COLUMN_RELEASE_DATE,
+                currentMovie.getReleaseDate());
+        mNewValues.put(DatabaseContract.favMovieEntry.COLUMN_VOTE_AVERAGE,
+                currentMovie.getVoteAverage());
+        mNewValues.put(DatabaseContract.favMovieEntry.COLUMN_POSTER_PATH,
+                currentMovie.getPosterPath());
+        mNewValues.put(DatabaseContract.favMovieEntry.COLUMN_BACKDROP_PATH,
+                currentMovie.getBackdropPath());
+        mNewValues.put(DatabaseContract.favMovieEntry.COLUMN_OVERVIEW, currentMovie.getOverview());
+
+        Uri result = context.getContentResolver().insert(databaseUri, mNewValues);
+
+        if (result != null) {
+            Log.d(TAG,
+                    String.format("addToFavorites: Success! - Table: %s / ID: %d / Name: %s",
+                            DatabaseContract.favMovieEntry.TABLE_NAME, currentMovie.getMovieId(),
+                            currentMovie.getTitle()));
+        }
+
+        return null;
+    }
 }

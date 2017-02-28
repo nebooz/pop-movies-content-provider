@@ -1,8 +1,7 @@
+
 package com.abnd.mdiaz.popularmovies.views.adapters;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,15 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.abnd.mdiaz.popularmovies.R;
-import com.abnd.mdiaz.popularmovies.database.DatabaseContract;
 import com.abnd.mdiaz.popularmovies.model.Movie;
+import com.abnd.mdiaz.popularmovies.rest.QueryMovies;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
 
@@ -50,52 +46,21 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
 
-        // Create a new instance of Realm.
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(mContext).build();
-        Realm realm = Realm.getInstance(realmConfiguration);
-
         Movie currentMovie = mMovieList.get(position);
 
-        Cursor movieCursor = queryMovieId(currentMovie.getMovieId());
+        if (QueryMovies.isFavorite(mContext, currentMovie.getMovieId())) {
 
-        if (null == movieCursor) {
-
-            Log.e(TAG, "extractMovies: Query Cursor returned null!, zomg!", new SQLiteDatabaseCorruptException());
-
-        } else if (movieCursor.getCount() < 1) {
-
-            movieCursor.close();
-            holder.favoriteTag.setVisibility(View.GONE);
-
+            holder.favoriteTag.setVisibility(View.VISIBLE);
 
         } else {
 
-            //Movie in Favorites
-            movieCursor.close();
-            holder.favoriteTag.setVisibility(View.VISIBLE);
-
+            holder.favoriteTag.setVisibility(View.GONE);
         }
 
         String fullPosterPath = IMAGE_BASE_URL + MEDIUM_IMAGE_SIZE + currentMovie.getPosterPath();
 
         Picasso.with(mContext).load(fullPosterPath).into(holder.movieThumbnail);
 
-    }
-
-    private Cursor queryMovieId(int movieDbId) {
-
-        String[] mProjection = {DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID};
-
-        String mSelectionClause = DatabaseContract.favMovieEntry.COLUMN_MOVIEDB_ID + " = ?";
-
-        String[] mSelectionArgs = {String.valueOf(movieDbId)};
-
-        return mContext.getContentResolver().query(
-                DatabaseContract.favMovieEntry.CONTENT_URI,
-                mProjection,
-                mSelectionClause,
-                mSelectionArgs,
-                null);
     }
 
     @Override
