@@ -8,7 +8,6 @@ import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.POP_MOVIES_TAG;
 import static com.abnd.mdiaz.popularmovies.rest.QueryMovies.TOP_MOVIES_TAG;
 
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -60,7 +59,6 @@ public class MovieDetailFragment extends Fragment {
     private static final String LARGE_IMAGE_SIZE = "w500";
     private static final int REVIEWS_LIMIT = 3;
     private static final int VIDEOS_LIMIT = 3;
-    OnDatabaseChangedListener mCallback;
     private ImageView backdropImageView;
     private ImageView posterImageView;
     private ImageView mFavoriteTag;
@@ -79,7 +77,6 @@ public class MovieDetailFragment extends Fragment {
     private double mMovieRating;
     private String mMovieSynopsis;
     private String mMovieReleaseDate;
-    private boolean isTablet;
     private int mDarkColor;
     private int mLightColor;
     private LinearLayout mMovieDetailReviewsContainer;
@@ -346,25 +343,6 @@ public class MovieDetailFragment extends Fragment {
 
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        isTablet = getArguments().getBoolean("is_tablet");
-
-        if (isTablet) {
-
-            try {
-                mCallback = (OnDatabaseChangedListener) context;
-            } catch (ClassCastException e) {
-                throw new ClassCastException(context.toString()
-                        + " must implement OnDatabaseChangedListener");
-            }
-
-        }
-
-    }
-
     public boolean getReviewList(int movieDbId) {
 
         List<MovieReview> reviewList = QueryMovieReviews.queryAllReviews(getContext(), movieDbId);
@@ -513,10 +491,6 @@ public class MovieDetailFragment extends Fragment {
 
         return true;
 
-    }
-
-    public interface OnDatabaseChangedListener {
-        void onDatabaseUpdate();
     }
 
     private class addExtrasToDb extends AsyncTask<String, Integer, Boolean> {

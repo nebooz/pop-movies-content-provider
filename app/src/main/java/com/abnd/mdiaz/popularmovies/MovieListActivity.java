@@ -12,16 +12,12 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.abnd.mdiaz.popularmovies.fragments.MovieDetailFragment;
-import com.abnd.mdiaz.popularmovies.fragments.MovieListFragment;
 import com.abnd.mdiaz.popularmovies.model.Movie;
-import com.abnd.mdiaz.popularmovies.rest.QueryMovies;
 import com.abnd.mdiaz.popularmovies.views.adapters.MovieViewHolder;
 
 public class MovieListActivity extends AppCompatActivity implements
-        MovieViewHolder.OnMovieSelectedListener,
-        MovieDetailFragment.OnDatabaseChangedListener {
+        MovieViewHolder.OnMovieSelectedListener {
 
-    public static final String INTER_FRAGMENT_TAG = "InterFragment";
     private static final String TAG = MovieListActivity.class.getSimpleName();
     private final String MOVIE_DETAIL_FRAGMENT_TAG = "movieDetail";
     private boolean isTwoPane = false;
@@ -89,14 +85,6 @@ public class MovieListActivity extends AppCompatActivity implements
                     .commit();
         }
 
-    }
-
-    @Override
-    public void onDatabaseUpdate() {
-        MovieListFragment movieListFragment = (MovieListFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.movie_list_fragment);
-
-        movieListFragment.getMovieList(QueryMovies.TOP_MOVIES_TAG);
     }
 
 }
